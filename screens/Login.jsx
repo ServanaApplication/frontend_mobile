@@ -41,166 +41,185 @@ const Login = () => {
         backgroundColor="transparent"
         barStyle="light-content"
         translucent={true}
-        hidden={true}
+        hidden={false}
       />
       <SafeAreaView className="flex-1 bg-[#1F1B24]">
-        <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === "ios ? 100 : 0"}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios ? 100 : 0"}
         >
-          <View className="flex-1 items-center justify-center py-15 px-4">
-            <Image
-              source={require("../assets/icon.png")}
-              resizeMode="contain"
-              style={{
-                width: 250,
-                height: 250,
-                maxWidth: "100%",
-                maxHeight: 250,
-              }}
-            />
-            <Text className="font-medium text-6xl text-[#6237A0] mb-12">
-              servana
-            </Text>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View className="flex-1 items-center justify-center py-15 px-4">
+              <Image
+                source={require("../assets/icon.png")}
+                resizeMode="contain"
+                style={{
+                  width: 250,
+                  height: 250,
+                  maxWidth: "100%",
+                  maxHeight: 250,
+                }}
+              />
+              <Text className="font-medium text-6xl text-[#6237A0] mb-12">
+                servana
+              </Text>
 
-            <View className="w-full max-w-md mt-5">
-              {/* Phone Number Input */}
-              <View className="flex-row items-center bg-[#444148] border-2 border-[#444148] rounded-lg h-12 mb-7 px-3 ">
-                {/* Country Picker */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginRight: 6,
-                  }}
-                >
-                  <CountryPicker
-                    withFilter
-                    withFlag
-                    withCallingCode
-                    withAlphaFilter
-                    withEmoji
-                    visible={showPicker}
-                    onClose={() => setShowPicker(false)}
-                    countryCode={countryCode}
-                    onSelect={(country) => {
-                      setCountryCode(country.cca2);
-                      setCountry(country);
-                      setShowPicker(false);
+              <View className="w-full max-w-md mt-5">
+                {/* Phone Number Input */}
+                <View className="flex-row items-center bg-[#444148] border-2 border-[#444148] rounded-lg h-12 mb-7 px-3 ">
+                  {/* Country Picker */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginRight: 6,
                     }}
-                    withModal
-                    withCountryNameButton={false}
-                    withCallingCodeButton={false}
+                  >
+                    <CountryPicker
+                      withFilter
+                      withFlag
+                      withCallingCode
+                      withAlphaFilter
+                      withEmoji
+                      visible={showPicker}
+                      onClose={() => setShowPicker(false)}
+                      countryCode={countryCode}
+                      onSelect={(country) => {
+                        setCountryCode(country.cca2);
+                        setCountry(country);
+                        setShowPicker(false);
+                      }}
+                      withModal
+                      withCountryNameButton={false}
+                      withCallingCodeButton={false}
+                    />
+
+                    <Text
+                      style={{ color: "#ffff", marginRight: 5, fontSize: 16 }}
+                    >
+                      {country?.callingCode
+                        ? `+${country.callingCode[0]}`
+                        : "+1"}
+                    </Text>
+                    <TouchableOpacity onPress={() => setShowPicker(true)}>
+                      <Feather name="chevron-down" size={16} color="#848287" />
+                    </TouchableOpacity>
+                  </View>
+                  {/* Divider */}
+                  <View
+                    style={{
+                      width: 1,
+                      height: "70%",
+                      backgroundColor: "#5E5C63",
+                      marginRight: 8,
+                    }}
                   />
 
-                  <Text
-                    style={{ color: "#ffff", marginRight: 5, fontSize: 16 }}
+                  {/* Phone Number TextInput */}
+                  <View style={{ flex: 1 }}>
+                    <TextInput
+                      value={phoneNumber}
+                      onChangeText={setPhoneNumber}
+                      placeholder="Phone Number"
+                      placeholderTextColor="#848287"
+                      keyboardType="phone-pad"
+                      style={{
+                        color: "#fff",
+                        fontSize: 16,
+                        height: "100%",
+                        paddingHorizontal: 15,
+                      }}
+                    />
+                  </View>
+                </View>
+                {/* Password Input */}
+                <View className="relative mb-3">
+                  <Feather
+                    name="lock"
+                    size={20}
+                    color="#848287"
+                    style={{
+                      position: "absolute",
+                      top: Platform.OS === "web" ? 14 : 12,
+                      left: 12,
+                      zIndex: 1,
+                    }}
+                  />
+                  <TextInput
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={secureText}
+                    placeholder="Password"
+                    placeholderTextColor="#848287"
+                    className="bg-[#444148] border-2 border-[#444148] rounded-lg h-12 pl-12 text-white text-lg"
+                  />
+                  <TouchableOpacity
+                    onPress={() => setSecureText(!secureText)}
+                    style={{
+                      position: "absolute",
+                      right: 19,
+                      top: Platform.OS === "web" ? 14 : 12,
+                    }}
                   >
-                    {country?.callingCode ? `+${country.callingCode[0]}` : "+1"}
-                  </Text>
-                  <TouchableOpacity onPress={() => setShowPicker(true)}>
-                    <Feather name="chevron-down" size={16} color="#848287" />
+                    <Feather
+                      name={secureText ? "eye-off" : "eye"}
+                      size={22}
+                      color="#848287"
+                    />
                   </TouchableOpacity>
                 </View>
-                {/* Divider */}
-                <View
-                  style={{
-                    width: 1,
-                    height: "70%",
-                    backgroundColor: "#5E5C63",
-                    marginRight: 8,
-                  }}
-                />
-
-                {/* Phone Number TextInput */}
-                <View style={{ flex: 1 }}>
-                  <TextInput
-                    value={phoneNumber}
-                    onChangeText={setPhoneNumber}
-                    placeholder="Phone Number"
-                    placeholderTextColor="#848287"
-                    keyboardType="phone-pad"
-                    style={{ color: "#fff", fontSize: 16, height: "100%", paddingHorizontal: 15 }}
-                  />
-                </View>
-              </View>
-              {/* Password Input */}
-              <View className="relative mb-3">
-                <Feather
-                  name="lock"
-                  size={20}
-                  color="#848287"
-                  style={{
-                    position: "absolute",
-                    top: Platform.OS === "web" ? 14 : 12,
-                    left: 12,
-                    zIndex: 1,
-                  }}
-                />
-                <TextInput
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={secureText}
-                  placeholder="Password"
-                  placeholderTextColor="#848287"
-                  className="bg-[#444148] border-2 border-[#444148] rounded-lg h-12 pl-12 text-white text-lg"
-                />
-                 <TouchableOpacity
-                  onPress={() => setSecureText(!secureText)}
-                  style={{
-                    position: "absolute",
-                    right: 19,
-                    top: Platform.OS === "web" ? 14 : 12,
-                  }}
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("ForgotPassword")}
                 >
-                  <Feather
-                    name={secureText ? "eye-off" : "eye"}
-                    size={22}
-                    color="#848287"
-                  />
-                </TouchableOpacity>
-              </View>
-                  <TouchableOpacity
-                onPress={() => navigation.navigate("ForgotPassword")}>
-              <Text
-                style={{
-                  color: "#ffffff",
-                  textAlign: "right",
-                  textDecorationLine: "underline",
-                  marginBottom: 80, 
-                  fontWeight: "600",
-                }}
-              >
-                Forgot Password?
-              </Text>
+                  <Text
+                    style={{
+                      color: "#ffffff",
+                      textAlign: "right",
+                      textDecorationLine: "underline",
+                      marginBottom: 80,
+                      fontWeight: "600",
+                    }}
+                  >
+                    Forgot Password?
+                  </Text>
                 </TouchableOpacity>
                 {/* Login Button */}
-              <TouchableOpacity
-                className="w-full max-w-md bg-[#6237A0] rounded-2xl py-3 items-center"
-                activeOpacity={0.8}
-                onPress={handleLogin}
-              >
-                <Text className="text-white font-semibold text-lg">Login</Text>
-              </TouchableOpacity>
-
-              {/* Sign Up Prompt */}
-              <View className="flex-row justify-center mt-5">
-                <Text className="text-[#ffffff]">Don't have an account?</Text>
-                <Text
-                  style={{
-                    color: "#ffffff",
-                    marginLeft: 6,
-                    textDecorationLine: "underline",
-                    fontWeight: "600",
-                  }}
+                <TouchableOpacity
+                  className="w-full max-w-md bg-[#6237A0] rounded-2xl py-3 items-center"
+                  activeOpacity={0.8}
+                  onPress={handleLogin}
                 >
-                  Sign Up
-                </Text>
+                  <Text className="text-white font-semibold text-lg">
+                    Login
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Sign Up Prompt */}
+                <View className="flex-row justify-center mt-5">
+                  <Text className="text-[#ffffff]">Don't have an account?</Text>
+                  
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("SignUp")}
+                  >
+                    <Text
+                      style={{
+                        color: "#ffffff",
+                        marginLeft: 6,
+                        textDecorationLine: "underline",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Sign Up
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </ScrollView>
+          </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </SafeAreaProvider>
