@@ -15,6 +15,9 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import CountryPicker from "react-native-country-picker-modal";
 import Feather from "react-native-vector-icons/Feather";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { getExampleNumber } from 'libphonenumber-js';
+
 
 const SignUp = () => {
   const navigation = useNavigation();
@@ -28,6 +31,27 @@ const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
+
+const handlePhoneChange = (text) => {
+  const digitsOnly = text.replace(/\D/g, "");
+  const countryIso = country?.cca2 || "US";
+  
+  // Use libphonenumber-js to check possible length
+  try {
+   const example = getExampleNumber(countryIso, 'mobile');
+    
+    const maxLength = example?.nationalNumber?.length || 10;
+
+    if (digitsOnly.length <= maxLength) {
+      setPhoneNumber(digitsOnly);
+    }
+  } catch (error) {
+    // fallback if parsing fails
+    if (digitsOnly.length <= 15) {
+      setPhoneNumber(digitsOnly);
+    }
+  }
+};
 
   return (
     <SafeAreaProvider>
@@ -108,7 +132,7 @@ const SignUp = () => {
                   placeholder="Phone Number"
                   placeholderTextColor="#7A7A7A"
                   value={phoneNumber}
-                  onChangeText={setPhoneNumber}
+                  onChangeText={handlePhoneChange}
                   className="text-white flex-1 py-4"
                   keyboardType="phone-pad"
                 />

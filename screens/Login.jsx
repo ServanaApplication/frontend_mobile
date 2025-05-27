@@ -11,11 +11,15 @@ import {
   Alert,
   KeyboardAvoidingView,
 } from "react-native";
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
 import CountryPicker from "react-native-country-picker-modal";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { getExampleNumber } from 'libphonenumber-js';
+
+
 
 const Login = () => {
   const navigation = useNavigation();
@@ -25,15 +29,46 @@ const Login = () => {
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
-  const [secureText, setSecureText] = useState(true); // Password visibility state
+  const [secureText, setSecureText] = useState(true);
 
   const handleLogin = () => {
-    if (phoneNumber.trim() === "" || password.trim() === "") {
-      Alert.alert("Error", "Please fill in both fields");
-      return;
+  const fullNumber = `+${country?.callingCode?.[0] || '1'}${phoneNumber}`;
+  const parsed = parsePhoneNumberFromString(fullNumber);
+
+  if (!phoneNumber.trim() || !password.trim()) {
+    Alert.alert("Error", "Please fill in both fields");
+    return;
+  }
+
+  if (!parsed?.isValid()) {
+    Alert.alert("Error", "Invalid phone number for selected country");
+    return;
+  }
+
+  Alert.alert("Success", `Login successful for ${parsed.number}`);
+};
+
+const handlePhoneChange = (text) => {
+  const digitsOnly = text.replace(/\D/g, "");
+  const countryIso = country?.cca2 || "US";
+  
+  // Use libphonenumber-js to check possible length
+  try {
+   const example = getExampleNumber(countryIso, 'mobile');
+    
+    const maxLength = example?.nationalNumber?.length || 10;
+
+    if (digitsOnly.length <= maxLength) {
+      setPhoneNumber(digitsOnly);
     }
-    Alert.alert("Success", "Login successful");
-  };
+  } catch (error) {
+    // fallback if parsing fails
+    if (digitsOnly.length <= 15) {
+      setPhoneNumber(digitsOnly);
+    }
+  }
+};
+
 
   return (
     <SafeAreaProvider>
@@ -47,7 +82,7 @@ const Login = () => {
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios ? 100 : 0"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
         >
           <ScrollView
             contentContainerStyle={{ flexGrow: 1 }}
@@ -70,8 +105,7 @@ const Login = () => {
 
               <View className="w-full max-w-md mt-5">
                 {/* Phone Number Input */}
-                <View className="flex-row items-center bg-[#444148] border-2 border-[#444148] rounded-lg h-12 mb-7 px-3 ">
-                  {/* Country Picker */}
+                <View className="flex-row items-center bg-[#444148] border-2 border-[#444148] rounded-lg h-12 mb-7 px-3">
                   <View
                     style={{
                       flexDirection: "row",
@@ -88,28 +122,24 @@ const Login = () => {
                       visible={showPicker}
                       onClose={() => setShowPicker(false)}
                       countryCode={countryCode}
-                      onSelect={(country) => {
-                        setCountryCode(country.cca2);
-                        setCountry(country);
+                      onSelect={(selectedCountry) => {
+                        setCountryCode(selectedCountry.cca2);
+                        setCountry(selectedCountry);
                         setShowPicker(false);
                       }}
                       withModal
                       withCountryNameButton={false}
                       withCallingCodeButton={false}
                     />
-
                     <Text
-                      style={{ color: "#ffff", marginRight: 5, fontSize: 16 }}
+                      style={{ color: "#fff", marginRight: 5, fontSize: 16 }}
                     >
-                      {country?.callingCode
-                        ? `+${country.callingCode[0]}`
-                        : "+1"}
+                      +{country?.callingCode?.[0] || "1"}
                     </Text>
                     <TouchableOpacity onPress={() => setShowPicker(true)}>
                       <Feather name="chevron-down" size={16} color="#848287" />
                     </TouchableOpacity>
                   </View>
-                  {/* Divider */}
                   <View
                     style={{
                       width: 1,
@@ -118,12 +148,10 @@ const Login = () => {
                       marginRight: 8,
                     }}
                   />
-
-                  {/* Phone Number TextInput */}
                   <View style={{ flex: 1 }}>
                     <TextInput
                       value={phoneNumber}
-                      onChangeText={setPhoneNumber}
+                      onChangeText={handlePhoneChange}
                       placeholder="Phone Number"
                       placeholderTextColor="#848287"
                       keyboardType="phone-pad"
@@ -136,6 +164,7 @@ const Login = () => {
                     />
                   </View>
                 </View>
+
                 {/* Password Input */}
                 <View className="relative mb-3">
                   <Feather
@@ -172,6 +201,7 @@ const Login = () => {
                     />
                   </TouchableOpacity>
                 </View>
+
                 <TouchableOpacity
                   onPress={() => navigation.navigate("ForgotPassword")}
                 >
@@ -187,6 +217,7 @@ const Login = () => {
                     Forgot Password?
                   </Text>
                 </TouchableOpacity>
+
                 {/* Login Button */}
                 <TouchableOpacity
                   className="w-full max-w-md bg-[#6237A0] rounded-2xl py-3 items-center"
@@ -201,7 +232,6 @@ const Login = () => {
                 {/* Sign Up Prompt */}
                 <View className="flex-row justify-center mt-5">
                   <Text className="text-[#ffffff]">Don't have an account?</Text>
-                  
                   <TouchableOpacity
                     onPress={() => navigation.navigate("SignUp")}
                   >
