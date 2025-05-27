@@ -13,10 +13,16 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 import CountryPicker from "react-native-country-picker-modal";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { getExampleNumber } from 'libphonenumber-js';
 import Feather from "react-native-vector-icons/Feather";
 
 const ForgotPassword = () => {
+  const navigation = useNavigation();
+
+  // State variables for phone number, country code, and country selection
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryCode, setCountryCode] = useState("US");
   const [country, setCountry] = useState(null);
@@ -30,7 +36,7 @@ const ForgotPassword = () => {
         translucent={true}
         hidden={false}
       />
-      <SafeAreaView className="flex-1 bg-[#1F1B24]">
+      <SafeAreaView style={{flex: 1, backgroundColor: "#1F1B24"}}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -40,7 +46,7 @@ const ForgotPassword = () => {
             contentContainerStyle={{ flexGrow: 1 }}
             keyboardShouldPersistTaps="handled"
           >
-            <View className="flex-1 items-center justify-center py-15 px-4">
+            <View className="flex-1 items-center justify-center py-15 px-4 bg-[#1F1B24]">
               <Image
                 source={require("../assets/icon.png")}
                 resizeMode="contain"
@@ -59,25 +65,25 @@ const ForgotPassword = () => {
               </Text>
               <View className="w-full mt-10 flex-row items-center bg-[#2B2B2B] rounded-lg px-3 mb-10">
                 {/* Country Picker */}
-                <View className="flex-row items-center mr-3">
+                <View className="flex-row items-center mr-6">
                   <CountryPicker
-                    withFilter
-                    withFlag
-                    withCallingCode
-                    withAlphaFilter
-                    withEmoji
-                    visible={showPicker}
-                    onClose={() => setShowPicker(false)}
-                    countryCode={countryCode}
-                    onSelect={(selectedCountry) => {
-                      setCountryCode(selectedCountry.cca2);
-                      setCountry(selectedCountry);
-                      setShowPicker(false);
-                    }}
-                    withModal
-                    withCountryNameButton={false}
-                    withCallingCodeButton={false}
-                  />
+                      withFilter
+                      withFlag
+                      withCallingCode
+                      withAlphaFilter
+                      withEmoji
+                      visible={showPicker}
+                      onClose={() => setShowPicker(false)}
+                      countryCode={countryCode}
+                      onSelect={(selectedCountry) => {
+                        setCountryCode(selectedCountry.cca2);
+                        setCountry(selectedCountry);
+                        setShowPicker(false);
+                      }}
+                      withModal
+                      withCountryNameButton={false}
+                      withCallingCodeButton={false}
+                    />
                   <Text className="text-white text-base ml- 1">
                     +{country?.callingCode[0] || "1"}
                   </Text>
@@ -86,7 +92,7 @@ const ForgotPassword = () => {
                       name="chevron-down"
                       size={16}
                       color="#848287"
-                      style={{ marginLeft: 6 }}
+                    
                     />
                   </TouchableOpacity>
                 </View>
