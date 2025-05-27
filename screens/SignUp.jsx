@@ -15,9 +15,8 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import CountryPicker from "react-native-country-picker-modal";
 import Feather from "react-native-vector-icons/Feather";
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { getExampleNumber } from 'libphonenumber-js';
-
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { getExampleNumber } from "libphonenumber-js";
 
 const SignUp = () => {
   const navigation = useNavigation();
@@ -32,26 +31,26 @@ const SignUp = () => {
   const [secureText, setSecureText] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
 
-const handlePhoneChange = (text) => {
-  const digitsOnly = text.replace(/\D/g, "");
-  const countryIso = country?.cca2 || "US";
-  
-  // Use libphonenumber-js to check possible length
-  try {
-   const example = getExampleNumber(countryIso, 'mobile');
-    
-    const maxLength = example?.nationalNumber?.length || 10;
+  const handlePhoneChange = (text) => {
+    const digitsOnly = text.replace(/\D/g, "");
+    const countryIso = country?.cca2 || "US";
 
-    if (digitsOnly.length <= maxLength) {
-      setPhoneNumber(digitsOnly);
+    // Use libphonenumber-js to check possible length
+    try {
+      const example = getExampleNumber(countryIso, "mobile");
+
+      const maxLength = example?.nationalNumber?.length || 10;
+
+      if (digitsOnly.length <= maxLength) {
+        setPhoneNumber(digitsOnly);
+      }
+    } catch (error) {
+      // fallback if parsing fails
+      if (digitsOnly.length <= 15) {
+        setPhoneNumber(digitsOnly);
+      }
     }
-  } catch (error) {
-    // fallback if parsing fails
-    if (digitsOnly.length <= 15) {
-      setPhoneNumber(digitsOnly);
-    }
-  }
-};
+  };
 
   return (
     <SafeAreaProvider>
@@ -85,7 +84,7 @@ const handlePhoneChange = (text) => {
             {/* Main Content */}
             <View className="flex items-center justify-center py-10">
               {/* Phone Number Input */}
-            <View className="w-full flex-row items-center bg-[#444148] border-2 border-[#444148] rounded-lg px-3 mb-6 mt-16">
+              <View className="w-full flex-row items-center bg-[#444148] border-2 border-[#444148] rounded-lg px-3 mb-6 mt-16">
                 <View className="flex-row items-center mr-3">
                   <CountryPicker
                     withFilter

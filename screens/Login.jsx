@@ -16,10 +16,8 @@ import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
 import CountryPicker from "react-native-country-picker-modal";
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { getExampleNumber } from 'libphonenumber-js';
-
-
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { getExampleNumber } from "libphonenumber-js";
 
 const Login = () => {
   const navigation = useNavigation();
@@ -31,46 +29,44 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
 
-const handleLogin = () => {
-  const fullNumber = `+${country?.callingCode?.[0] || '1'}${phoneNumber}`;
-  const parsed = parsePhoneNumberFromString(fullNumber);
+  const handleLogin = () => {
+    const fullNumber = `+${country?.callingCode?.[0] || "1"}${phoneNumber}`;
+    const parsed = parsePhoneNumberFromString(fullNumber);
 
-  if (!phoneNumber.trim() || !password.trim()) {
-    Alert.alert("Error", "Please fill in both fields");
-    return;
-  }
-
-  if (!parsed?.isValid()) {
-    Alert.alert("Error", "Invalid phone number for selected country");
-    return;
-  }
-
-  // Successful login - navigate to Dashboard
-  navigation.navigate("Main");
-};
-
-
-const handlePhoneChange = (text) => {
-  const digitsOnly = text.replace(/\D/g, "");
-  const countryIso = country?.cca2 || "US";
-  
-  // Use libphonenumber-js to check possible length
-  try {
-   const example = getExampleNumber(countryIso, 'mobile');
-    
-    const maxLength = example?.nationalNumber?.length || 10;
-
-    if (digitsOnly.length <= maxLength) {
-      setPhoneNumber(digitsOnly);
+    if (!phoneNumber.trim() || !password.trim()) {
+      Alert.alert("Error", "Please fill in both fields");
+      return;
     }
-  } catch (error) {
-    // fallback if parsing fails
-    if (digitsOnly.length <= 15) {
-      setPhoneNumber(digitsOnly);
-    }
-  }
-};
 
+    if (!parsed?.isValid()) {
+      Alert.alert("Error", "Invalid phone number for selected country");
+      return;
+    }
+
+    // Successful login - navigate to Dashboard
+    navigation.navigate("Main");
+  };
+
+  const handlePhoneChange = (text) => {
+    const digitsOnly = text.replace(/\D/g, "");
+    const countryIso = country?.cca2 || "US";
+
+    // Use libphonenumber-js to check possible length
+    try {
+      const example = getExampleNumber(countryIso, "mobile");
+
+      const maxLength = example?.nationalNumber?.length || 10;
+
+      if (digitsOnly.length <= maxLength) {
+        setPhoneNumber(digitsOnly);
+      }
+    } catch (error) {
+      // fallback if parsing fails
+      if (digitsOnly.length <= 15) {
+        setPhoneNumber(digitsOnly);
+      }
+    }
+  };
 
   return (
     <SafeAreaProvider>
