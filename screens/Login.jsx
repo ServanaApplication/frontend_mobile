@@ -31,7 +31,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
 
-  const handleLogin = () => {
+const handleLogin = () => {
   const fullNumber = `+${country?.callingCode?.[0] || '1'}${phoneNumber}`;
   const parsed = parsePhoneNumberFromString(fullNumber);
 
@@ -45,8 +45,10 @@ const Login = () => {
     return;
   }
 
-  Alert.alert("Success", `Login successful for ${parsed.number}`);
+  // Successful login - navigate to Dashboard
+  navigation.navigate("Main");
 };
+
 
 const handlePhoneChange = (text) => {
   const digitsOnly = text.replace(/\D/g, "");
