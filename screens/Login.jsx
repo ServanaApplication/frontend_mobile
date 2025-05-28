@@ -58,28 +58,38 @@ const getFlagEmoji = (countryCode) => {
 
 export default function Login() {
   const navigation = useNavigation();
-  const [selectedCountry, setSelectedCountry] = useState(rawCountries[1]); // PH
+  const [selectedCountry, setSelectedCountry] = useState(
+  rawCountries.find(c => c.code === "PH") || rawCountries[0]
+);
+ // PH
   const [modalVisible, setModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
 
   const handleLogin = () => {
-    const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
-    const parsed = parsePhoneNumberFromString(fullNumber);
+  if (!phoneNumber?.trim() || !password?.trim()) {
+    Alert.alert("Error", "Please fill in both fields");
+    return;
+  }
 
-    if (!phoneNumber.trim() || !password.trim()) {
-      Alert.alert("Error", "Please fill in both fields");
-      return;
-    }
+  if (!selectedCountry?.callingCode) {
+    Alert.alert("Error", "Please select a country");
+    return;
+  }
 
-    if (!parsed?.isValid()) {
-      Alert.alert("Error", "Invalid phone number for selected country");
-      return;
-    }
+  const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
+  const parsed = parsePhoneNumberFromString(fullNumber);
 
-    Alert.alert("Success", `Login successful for ${parsed.number}`);
-  };
+  if (!parsed?.isValid()) {
+    Alert.alert("Error", "Invalid phone number for selected country");
+    return;
+  }
+
+  Alert.alert("Success", `Login successful for ${parsed.number}`);
+  navigation.navigate("HomeScreen");
+};
+
 
   const handlePhoneChange = (text) => {
     const digitsOnly = text.replace(/\D/g, "");
