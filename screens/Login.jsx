@@ -222,9 +222,11 @@ export default function Login() {
               </TouchableOpacity>
 
               {/* Login Button */}
+              <View style={{ marginTop: 35, width: "100%" }}>
               <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
                 <Text style={styles.loginText}>Login</Text>
               </TouchableOpacity>
+              </View>
 
               {/* Sign Up */}
               <View style={styles.signUpContainer}>
