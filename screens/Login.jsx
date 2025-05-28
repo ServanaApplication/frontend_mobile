@@ -82,7 +82,8 @@ const handlePhoneChange = (text) => {
 
     // Successful login - navigate to Dashboard
     navigation.navigate("Main");
-  };
+  } catch (error) {
+    // Fallback if parsing fails  
 
   const handlePhoneChange = (text) => {
     const digitsOnly = text.replace(/\D/g, "");
@@ -296,6 +297,8 @@ const handlePhoneChange = (text) => {
     </SafeAreaProvider>
   );
 };
+}
+}
 
 export default Login;
 
