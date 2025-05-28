@@ -10,69 +10,67 @@ import {
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
+  Modal,
+  FlatList,
 } from "react-native";
-// import { LogBox } from 'react-native';
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
-import RNPickerSelect from "react-native-picker-select";
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import { getExampleNumber } from 'libphonenumber-js';
+import { parsePhoneNumberFromString, getExampleNumber } from "libphonenumber-js";
 
-// Ignore specific warning about defaultProps in react-native-country-picker-modal
-// LogBox.ignoreLogs([
-//   'Support for defaultProps will be removed',
-// ]);
+const rawCountries = [
+  { label: "US +1", code: "US", callingCode: "1" },
+  { label: "PH +63", code: "PH", callingCode: "63" },
+  { label: "GB +44", code: "GB", callingCode: "44" },
+  { label: "CA +1", code: "CA", callingCode: "1" },
+  { label: "AU +61", code: "AU", callingCode: "61" },
+  { label: "NZ +64", code: "NZ", callingCode: "64" },
+  { label: "IN +91", code: "IN", callingCode: "91" },
+  { label: "SG +65", code: "SG", callingCode: "65" },
+  { label: "MY +60", code: "MY", callingCode: "60" },
+  { label: "ID +62", code: "ID", callingCode: "62" },
+  { label: "TH +66", code: "TH", callingCode: "66" },
+  { label: "JP +81", code: "JP", callingCode: "81" },
+  { label: "KR +82", code: "KR", callingCode: "82" },
+  { label: "CN +86", code: "CN", callingCode: "86" },
+  { label: "DE +49", code: "DE", callingCode: "49" },
+  { label: "FR +33", code: "FR", callingCode: "33" },
+  { label: "ES +34", code: "ES", callingCode: "34" },
+  { label: "IT +39", code: "IT", callingCode: "39" },
+  { label: "BR +55", code: "BR", callingCode: "55" },
+  { label: "ZA +27", code: "ZA", callingCode: "27" },
+  { label: "AE +971", code: "AE", callingCode: "971" },
+  { label: "SA +966", code: "SA", callingCode: "966" },
+  { label: "EG +20", code: "EG", callingCode: "20" },
+  { label: "NG +234", code: "NG", callingCode: "234" }, 
+];
 
-const countryOptions = [
-  { label: "US +1", value: { code: "US", callingCode: "1"} },
-  {label: "PH +63", value: { code: "PH", callingCode: "26"} },
-  { label: "GB +44", value: { code: "GB", callingCode: "44"} },
-  { label: "CA +1", value: { code: "CA", callingCode: "1"} },
-  { label: "AU +61", value: { code: "AU", callingCode: "61"} },
-  { label: "NZ +64", value: { code: "NZ", callingCode: "64"} },
-  { label: "IN +91", value: { code: "IN", callingCode: "91"} },
-  { label: "SG +65", value: { code: "SG", callingCode: "65"} },
-  { label: "MY +60", value: { code: "MY", callingCode: "60"} },
-  { label: "ID +62", value: { code: "ID", callingCode: "62"} },
-  { label: "TH +66", value: { code: "TH", callingCode: "66"} },
-]
+const getFlagEmoji = (countryCode) => {
+  return countryCode
+    .toUpperCase()
+    .replace(/./g, (char) =>
+      String.fromCodePoint(127397 + char.charCodeAt(0))
+    );
+};
 
-const Login = () => {
+
+
+export default function Login() {
   const navigation = useNavigation();
-  const [selectedCountry, setSelectedCountry] = useState({code: "PH", callingCode: "63"});
+  const [selectedCountry, setSelectedCountry] = useState(rawCountries[1]); // PH
+  const [modalVisible, setModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
 
   const handleLogin = () => {
-  const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
-  const parsed = parsePhoneNumberFromString(fullNumber);
+    const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
+    const parsed = parsePhoneNumberFromString(fullNumber);
 
-  // Validate phone number and password
-  if (!phoneNumber.trim() || !password.trim()) {
-    Alert.alert("Error", "Please fill in both fields");
-    return;
-  }
-
-  if (!parsed?.isValid()) {
-    Alert.alert("Error", "Invalid phone number for selected country");
-    return;
-  }
-
-  Alert.alert("Success", `Login successful for ${parsed.number}`);
-};
-
-const handlePhoneChange = (text) => {
-  const digitsOnly = text.replace(/\D/g, "");
-  
-  // Use libphonenumber-js to check possible length
-  try {
-   const example = getExampleNumber(selectedCountry.code, 'mobile');
-    const maxLength = example?.nationalNumber?.length || 10;
-    if (digitsOnly.length <= maxLength) {
-      setPhoneNumber(digitsOnly);
+    if (!phoneNumber.trim() || !password.trim()) {
+      Alert.alert("Error", "Please fill in both fields");
+      return;
     }
 
     if (!parsed?.isValid()) {
@@ -80,41 +78,38 @@ const handlePhoneChange = (text) => {
       return;
     }
 
-    // Successful login - navigate to Dashboard
-    navigation.navigate("Main");
-  } catch (error) {
-    // Fallback if parsing fails  
+    Alert.alert("Success", `Login successful for ${parsed.number}`);
+  };
 
   const handlePhoneChange = (text) => {
     const digitsOnly = text.replace(/\D/g, "");
-    const countryIso = country?.cca2 || "US";
-
-    // Use libphonenumber-js to check possible length
     try {
-      const example = getExampleNumber(countryIso, "mobile");
-
+      const example = getExampleNumber(selectedCountry.code, "mobile");
       const maxLength = example?.nationalNumber?.length || 10;
-
       if (digitsOnly.length <= maxLength) {
         setPhoneNumber(digitsOnly);
       }
-    } catch (error) {
-      // fallback if parsing fails
+    } catch {
       if (digitsOnly.length <= 15) {
         setPhoneNumber(digitsOnly);
       }
     }
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredCountries = rawCountries.filter((country) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      country.label.toLowerCase().includes(query) ||
+      country.callingCode.includes(query) ||
+      country.code.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <SafeAreaProvider>
-      <StatusBar
-        backgroundColor="#1F1B24"
-        barStyle="light-content"
-        translucent={true}
-        hidden={false}
-      />
-      <SafeAreaView style={{flex: 1, backgroundColor: "#1F1B24"}}>
+      <StatusBar backgroundColor="#1F1B24" barStyle="light-content" />
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1B24" }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -124,171 +119,119 @@ const handlePhoneChange = (text) => {
             contentContainerStyle={{ flexGrow: 1 }}
             keyboardShouldPersistTaps="handled"
           >
-            <View className="flex-1 items-center justify-center py-15 px-4 bg-[#1F1B24]">
+            <View style={styles.container}>
               <Image
                 source={require("../assets/icon.png")}
                 resizeMode="contain"
-                style={{
-                  width: 250,
-                  height: 250,
-                  maxWidth: "100%",
-                  maxHeight: 250,
-                }}
+                style={styles.logo}
               />
-              <Text className="font-medium text-6xl text-[#6237A0] mb-12">
-                servana
-              </Text>
+              <Text style={styles.title}>servana</Text>
 
-              <View className="w-full max-w-md mt-5">
-                {/* Phone Number Input with Picker */}
-                <View className="flex-row items-center bg-[#444148] border-2 border-[#444148] rounded-lg h-12 mb-7 px-3">
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginRight: 6,
-                    }}
-                  >
-                    <RNPickerSelect
-                    onValueChange={(value) => setSelectedCountry(value)}
-                    items={countryOptions}
-                    value={selectedCountry}
-                    useNativeAndroidPickerStyle={false}
-                     style={{
-                        inputAndroid: {
-                          color: "#fff",
-                          fontSize: 16,
-                        },
-                        inputIOS: {
-                          color: "#fff",
-                          fontSize: 16,
-                        },
-                        iconContainer: {
-                          top: 10,
-                          right: 12,
-                        },
-                      }}
-                     
-                    />
-                    <Text
-                      style={{ color: "#fff", marginRight: 5, fontSize: 16 }}
-                    >
-                      +{country?.callingCode?.[0] || "1"}
-                    </Text>
-                    <TouchableOpacity onPress={() => setShowPicker(true)}>
-                      <Feather name="chevron-down" size={16} color="#848287" />
-                    </TouchableOpacity>
-                  </View>
-                  <View
-                    style={{
-                      width: 1,
-                      height: "70%",
-                      backgroundColor: "#5E5C63",
-                      marginRight: 8,
-                    }}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <TextInput
-                      value={phoneNumber}
-                      onChangeText={handlePhoneChange}
-                      placeholder="Phone Number"
-                      placeholderTextColor="#848287"
-                      keyboardType="phone-pad"
-                      style={{
-                        color: "#fff",
-                        fontSize: 16,
-                        height: "100%",
-                        paddingHorizontal: 15,
-                      }}
-                    />
-                  </View>
-                </View>
+              <View style={styles.inputContainer}>
+                {/* Phone Number Input with Modal Picker */}
+                <TouchableOpacity
+                  onPress={() => setModalVisible(true)}
+                  style={styles.countryPicker}
+                >
+                  <Text style={styles.flagText}>
+                    {getFlagEmoji(selectedCountry.code)} +{selectedCountry.callingCode}
+                  </Text>
+                  <Feather name="chevron-down" size={18} color="#848287" />
+                </TouchableOpacity>
+                <View style={styles.separator} />
+                <TextInput
+                  value={phoneNumber}
+                  onChangeText={handlePhoneChange}
+                  placeholder="Phone Number"
+                  placeholderTextColor="#848287"
+                  keyboardType="phone-pad"
+                  style={styles.phoneInput}
+                />
+              </View>
 
-                {/* Password Input */}
-                <View className="relative mb-3">
+             {/* Country Modal with Search */}
+<Modal visible={modalVisible} animationType="slide">
+  <SafeAreaView style={styles.modalContainer}>
+    <View style={styles.searchBox}>
+      <Feather name="search" size={18} color="#888" style={{ marginRight: 8 }} />
+      <TextInput
+        placeholder="Search country, code or dial"
+        placeholderTextColor="#aaa"
+        style={styles.searchInput}
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+    </View>
+
+    <FlatList
+      data={filteredCountries}
+      keyExtractor={(item) => item.code}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.countryItem}
+          onPress={() => {
+            setSelectedCountry(item);
+            setModalVisible(false);
+            setSearchQuery("");
+          }}
+        >
+          <Text style={styles.countryText}>
+            {getFlagEmoji(item.code)} {item.label}
+          </Text>
+        </TouchableOpacity>
+      )}
+    />
+  </SafeAreaView>
+</Modal>
+
+
+              {/* Password Input */}
+              <View style={styles.passwordContainer}>
+                <Feather
+                  name="lock"
+                  size={20}
+                  color="#848287"
+                  style={styles.lockIcon}
+                />
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={secureText}
+                  placeholder="Password"
+                  placeholderTextColor="#848287"
+                  style={styles.passwordInput}
+                />
+                <TouchableOpacity
+                  onPress={() => setSecureText(!secureText)}
+                  style={styles.eyeIcon}
+                >
                   <Feather
-                    name="lock"
-                    size={20}
+                    name={secureText ? "eye-off" : "eye"}
+                    size={22}
                     color="#848287"
-                    style={{
-                      position: "absolute",
-                      top: Platform.OS === "web" ? 14 : 12,
-                      left: 12,
-                      zIndex: 1,
-                    }}
                   />
-                  <TextInput
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={secureText}
-                    placeholder="Password"
-                    placeholderTextColor="#848287"
-                    className="bg-[#444148] border-2 border-[#444148] rounded-lg h-12 pl-12 text-white text-lg"
-                  />
-                  <TouchableOpacity
-                    onPress={() => setSecureText(!secureText)}
-                    style={{
-                      position: "absolute",
-                      right: 19,
-                      top: Platform.OS === "web" ? 14 : 12,
-                    }}
-                  >
-                    <Feather
-                      name={secureText ? "eye-off" : "eye"}
-                      size={22}
-                      color="#848287"
-                    />
-                  </TouchableOpacity>
-                </View>
-                
-                <View style={{ alignItems: "flex-end"}}>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("ForgotPassword")}
-                >
-                  <Text
-                    style={{
-                      color: "#ffffff",
-                      textDecorationLine: "underline",
-                      marginBottom: 12,
-                      fontWeight: "600",
-                    }}
-                  >
-                    Forgot Password?
-                  </Text>
                 </TouchableOpacity>
-                  </View>
+              </View>
 
-                {/* Login Button */}
-                <View className="mt-12">
-                <TouchableOpacity
-                  className="w-full max-w-md bg-[#6237A0] rounded-2xl py-3 items-center"
-                  activeOpacity={0.8}
-                  onPress={handleLogin}
-                >
-                  <Text className="text-white font-semibold text-lg">
-                    Login
-                  </Text>
+              {/* Forgot Password */}
+              <TouchableOpacity
+                style={{ alignSelf: "flex-end", marginBottom: 12 }}
+                onPress={() => navigation.navigate("ForgotPassword")}
+              >
+                <Text style={styles.linkText}>Forgot Password?</Text>
+              </TouchableOpacity>
+
+              {/* Login Button */}
+              <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                <Text style={styles.loginText}>Login</Text>
+              </TouchableOpacity>
+
+              {/* Sign Up */}
+              <View style={styles.signUpContainer}>
+                <Text style={styles.signUpText}>Don't have an account?</Text>
+                <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+                  <Text style={styles.linkText}> Sign Up</Text>
                 </TouchableOpacity>
-                </View>
-
-                {/* Sign Up Prompt */}
-                <View className="flex-row justify-center mt-5">
-                  <Text className="text-[#ffffff]">Don't have an account?</Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("SignUp")}
-                  >
-                    <Text
-                      style={{
-                        color: "#ffffff",
-                        marginLeft: 6,
-                        textDecorationLine: "underline",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Sign Up
-                    </Text>
-                  </TouchableOpacity>
-                </View>
               </View>
             </View>
           </ScrollView>
@@ -296,10 +239,135 @@ const handlePhoneChange = (text) => {
       </SafeAreaView>
     </SafeAreaProvider>
   );
-};
-}
 }
 
-export default Login;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#1F1B24",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    paddingTop: 30,
+  },
+  logo: {
+    width: 250,
+    height: 250,
+  },
+  title: {
+    fontSize: 40,
+    color: "#6237A0",
+    marginBottom: 30,
+    fontWeight: "600",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#444148",
+    borderRadius: 10,
+    marginBottom: 15,
+    paddingHorizontal: 10,
+    height: 50,
+  },
+  countryPicker: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  flagText: {
+    color: "#fff",
+    fontSize: 16,
+    marginRight: 6,
+  },
+  separator: {
+    width: 1,
+    height: "70%",
+    backgroundColor: "#5E5C63",
+    marginRight: 10,
+  },
+  phoneInput: {
+    color: "#fff",
+    fontSize: 16,
+    flex: 1,
+  },
+  passwordContainer: {
+    position: "relative",
+    width: "100%",
+    backgroundColor: "#444148",
+    borderRadius: 10,
+    height: 50,
+    justifyContent: "center",
+    marginBottom: 15,
+  },
+  passwordInput: {
+    color: "#fff",
+    fontSize: 16,
+    paddingLeft: 45,
+    paddingRight: 45,
+    height: "100%",
+  },
+  lockIcon: {
+    position: "absolute",
+    left: 12,
+    top: 15,
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 12,
+    top: 15,
+  },
+  loginButton: {
+    backgroundColor: "#6237A0",
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: "center",
+    width: "100%",
+  },
+  loginText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  linkText: {
+    color: "#fff",
+    textDecorationLine: "underline",
+    fontWeight: "600",
+  },
+  signUpContainer: {
+    flexDirection: "row",
+    marginTop: 20,
+  },
+  signUpText: {
+    color: "#fff",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#1F1B24",
+    paddingTop: 50,
+  },
+  countryItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
+  },
+  countryText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  searchBox: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#333",
+  borderRadius: 10,
+  paddingHorizontal: 12,
+  marginHorizontal: 16,
+  marginBottom: 10,
+  height: 40,
+},
+searchInput: {
+  flex: 1,
+  color: "#fff",
+  fontSize: 16,
+},
 
-const styles = StyleSheet.create({});
+});

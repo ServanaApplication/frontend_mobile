@@ -25,8 +25,13 @@ const AppNavigation = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-        <Stack.Screen name="Main" component={BottomNavbar} />
+        {/* <Stack.Screen name="Main" component={BottomNavbar} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+export default AppNavigation;
+const Stack = createNativeStackNavigator();
+
+
