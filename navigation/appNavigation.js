@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "../screens/Login";
 import ForgotPassword from "../screens/ForgotPassword";
 import SignUp from "../screens/SignUp";
+import BottomTabs from "../navigation/BottomTabs";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -25,6 +26,8 @@ const AppNavigation = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+        <Stack.Screen name="HomeScreen" component={BottomTabs} />
+      
         {/* <Stack.Screen name="Main" component={BottomNavbar} /> */}
       </Stack.Navigator>
     </NavigationContainer>
