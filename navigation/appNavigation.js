@@ -1,20 +1,27 @@
-// navigation/AppNavigation.js
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Login from "../screens/Login";
+import ForgotPassword from "../screens/ForgotPassword";
+import SignUp from "../screens/SignUp";
 
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-
-import Login from '../screens/Login';
-import SignUp from '../screens/SignUp';
-import ForgotPassword from '../screens/ForgotPassword';
-import BottomNavbar from '../components/bottomnavbar'; // <-- use this instead of individual screens
-
-const Stack = createStackNavigator();
+const MyTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: "#1F1B24", // Set the background to transparent
+  },
+};
 
 const AppNavigation = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <NavigationContainer theme={MyTheme}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { 
+            backgroundColor: "#1F1B24" },
+        }}
+      >
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
@@ -22,6 +29,4 @@ const AppNavigation = () => {
       </Stack.Navigator>
     </NavigationContainer>
   );
-};
-
-export default AppNavigation;
+}
