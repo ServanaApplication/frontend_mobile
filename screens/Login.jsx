@@ -74,14 +74,36 @@ const handlePhoneChange = (text) => {
     if (digitsOnly.length <= maxLength) {
       setPhoneNumber(digitsOnly);
     }
-  } catch (error) {
-    // fallback if parsing fails
-    if (digitsOnly.length <= 15) {
-      setPhoneNumber(digitsOnly);
-    }
-  }
-};
 
+    if (!parsed?.isValid()) {
+      Alert.alert("Error", "Invalid phone number for selected country");
+      return;
+    }
+
+    // Successful login - navigate to Dashboard
+    navigation.navigate("Main");
+  };
+
+  const handlePhoneChange = (text) => {
+    const digitsOnly = text.replace(/\D/g, "");
+    const countryIso = country?.cca2 || "US";
+
+    // Use libphonenumber-js to check possible length
+    try {
+      const example = getExampleNumber(countryIso, "mobile");
+
+      const maxLength = example?.nationalNumber?.length || 10;
+
+      if (digitsOnly.length <= maxLength) {
+        setPhoneNumber(digitsOnly);
+      }
+    } catch (error) {
+      // fallback if parsing fails
+      if (digitsOnly.length <= 15) {
+        setPhoneNumber(digitsOnly);
+      }
+    }
+  };
 
   return (
     <SafeAreaProvider>

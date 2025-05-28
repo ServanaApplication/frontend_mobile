@@ -12,8 +12,7 @@ const MyTheme = {
   },
 };
 
-const Stack = createNativeStackNavigator();
-export default function AppNavigation() {
+const AppNavigation = () => {
   return (
     <NavigationContainer theme={MyTheme}>
       <Stack.Navigator
@@ -24,8 +23,9 @@ export default function AppNavigation() {
         }}
       >
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen name="SignUp" component={SignUp} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+        <Stack.Screen name="Main" component={BottomNavbar} />
       </Stack.Navigator>
     </NavigationContainer>
   );
