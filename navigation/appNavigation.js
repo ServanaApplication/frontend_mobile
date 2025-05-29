@@ -4,6 +4,7 @@ import Login from "../screens/Login";
 import ForgotPassword from "../screens/ForgotPassword";
 import SignUp from "../screens/SignUp";
 import BottomTabs from "../navigation/BottomTabs";
+import Messages from "../screens/Messages";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -27,6 +28,7 @@ const AppNavigation = () => {
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen name="HomeScreen" component={BottomTabs} />
+        <Stack.Screen name="Messages" component={Messages} />
       
         {/* <Stack.Screen name="Main" component={BottomNavbar} /> */}
       </Stack.Navigator>
