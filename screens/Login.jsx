@@ -85,8 +85,6 @@ export default function Login() {
     Alert.alert("Error", "Invalid phone number for selected country");
     return;
   }
-
-  Alert.alert("Success", `Login successful for ${parsed.number}`);
   navigation.navigate("HomeScreen");
 };
 
