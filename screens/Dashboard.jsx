@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native'; // ✅ You already have this
 
 const faqs = [
   {
@@ -19,6 +20,7 @@ const faqs = [
 
 const Dashboard = () => {
   const [openIndex, setOpenIndex] = useState(null);
+  const navigation = useNavigation(); // ✅ Add this line
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -27,7 +29,6 @@ const Dashboard = () => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Group header, subheader, and card together */}
         <View style={styles.topBlock}>
           <Text style={styles.header}>Hi Juan</Text>
           <Text style={styles.subheader}>Helping you, one chat at a time.</Text>
@@ -47,13 +48,15 @@ const Dashboard = () => {
                 <Text style={styles.replyTime}>Get a reply in a minute</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate('Messages')} // ✅ Navigates to Messages screen
+            >
               <Text style={styles.buttonText}>Start Conversation</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* FAQs placed right below the topBlock */}
         <View style={styles.faqSection}>
           <Text style={styles.faqTitle}>Frequently Asked Questions</Text>
           {faqs.map((faq, index) => (
@@ -94,7 +97,7 @@ const styles = StyleSheet.create({
     // Center horizontally removed because header/subheader will be left aligned
   },
   topBlock: {
-    marginTop: 160, // pushes whole block down
+    marginTop: 100, // pushes whole block down
     width: '100%',
     maxWidth: 400,
   },
@@ -148,7 +151,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   faqSection: {
-    // Removed borderTopWidth and borderTopColor here
+    marginTop: 70,
     paddingVertical: 16,
     backgroundColor: '#fff',
     width: '100%',
