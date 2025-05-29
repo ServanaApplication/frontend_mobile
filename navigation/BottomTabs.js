@@ -18,6 +18,7 @@ const BottomTabs = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarHideOnKeyboard: true, // 🔹 Hide tab bar when keyboard is open
         tabBarShowLabel: false, // 🔹 Hide label under icon
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: 'gray',

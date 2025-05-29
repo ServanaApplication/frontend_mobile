@@ -217,10 +217,11 @@ const SignUp = () => {
                     Alert.alert("Error", "Passwords do not match");
                   } else {
                     Alert.alert("Success", "Signed up successfully!");
+                    navigation.navigate("SignUpVerification");
                   }
                 }}
                 style={{
-                  backgroundColor: "#6237A0",
+                  backgroundColor: "#6237A0", 
                   borderRadius: 10,
                   padding: 16,
                   marginTop: 38 ,

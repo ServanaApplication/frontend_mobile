@@ -86,7 +86,7 @@ export default function Login() {
     return;
   }
 
-  Alert.alert("Success", `Login successful for ${parsed.number}`);
+  Alert.alert("Success", "Login Successful");
   navigation.navigate("HomeScreen");
 };
 

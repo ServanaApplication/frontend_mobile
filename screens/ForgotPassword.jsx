@@ -96,6 +96,7 @@ const ForgotPassword = () => {
       Alert.alert("Error", "Invalid phone number for selected country");
     } else {
       Alert.alert("Success", `Code sent to ${parsed.number}`);
+      navigation.navigate("Verification")
     }
   };
 

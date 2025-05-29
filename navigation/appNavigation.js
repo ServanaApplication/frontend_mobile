@@ -4,6 +4,9 @@ import Login from "../screens/Login";
 import ForgotPassword from "../screens/ForgotPassword";
 import SignUp from "../screens/SignUp";
 import BottomTabs from "../navigation/BottomTabs";
+import ResetPassword from "../screens/ResetPassword";
+import Verification from "../screens/Verification";
+import SignUpVerification from "../screens/SignUpVerification";
 
 const MyTheme = {
   ...DefaultTheme,
@@ -27,8 +30,9 @@ const AppNavigation = () => {
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen name="HomeScreen" component={BottomTabs} />
-      
-        {/* <Stack.Screen name="Main" component={BottomNavbar} /> */}
+        <Stack.Screen name="ResetPassword" component={ResetPassword} />
+        <Stack.Screen name="Verification" component={Verification} />
+        <Stack.Screen name="SignUpVerification" component={SignUpVerification} />
       </Stack.Navigator>
     </NavigationContainer>
   );
