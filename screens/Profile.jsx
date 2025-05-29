@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native'; // ✅ Added
 
 export default function ProfileScreen() {
   const [image, setImage] = useState(null);
+  const navigation = useNavigation(); // ✅ Added
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -14,7 +16,7 @@ export default function ProfileScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // still works with warning
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
     });
@@ -60,7 +62,17 @@ export default function ProfileScreen() {
           <Text style={styles.selectionText}>Change Password</Text>
         </TouchableOpacity>
       </View>
+            <View style={styles.logoutSection}>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={() => navigation.replace('Login')} // ✅ Updated
+        >
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
+
     </SafeAreaView>
+    
   );
 }
 
@@ -103,6 +115,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+    logoutSection: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    right: 20,
+  },
+  logoutButton: {
+    backgroundColor: '#6237A0',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  logoutText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   selectionSection: {
     marginTop: 40,
