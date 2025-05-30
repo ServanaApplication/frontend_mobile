@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
-import { View, Image, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { Feather } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native'; // ✅ Added
+import React, { useState } from "react";
+import {
+  View,
+  Image,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native"; // ✅ Added
 
 export default function ProfileScreen() {
   const [image, setImage] = useState(null);
   const navigation = useNavigation(); // ✅ Added
 
   const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       alert("Permission to access media library is required!");
       return;
@@ -37,7 +45,9 @@ export default function ProfileScreen() {
         <View style={styles.imageWrapper}>
           <TouchableOpacity onPress={pickImage}>
             <Image
-              source={image ? { uri: image } : require('../assets/userblank.jpg')}
+              source={
+                image ? { uri: image } : require("../assets/userblank.jpg")
+              }
               style={styles.profileImage}
             />
             <Feather
@@ -53,93 +63,108 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.selectionSection}>
-        <TouchableOpacity style={styles.selectionRow}>
-          <Feather name="user" size={24} color="#6237A0" style={styles.selectionIcon} />
+        <TouchableOpacity
+          style={styles.selectionRow}
+          onPress={() => navigation.navigate("MyProfile")}
+        >
+          <Feather
+            name="user"
+            size={24}
+            color="#6237A0"
+            style={styles.selectionIcon}
+          />
           <Text style={styles.selectionText}>My Profile</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.selectionRow}>
-          <Feather name="lock" size={24} color="#6237A0" style={styles.selectionIcon} />
+
+        <TouchableOpacity
+          style={styles.selectionRow}
+          onPress={() => navigation.navigate("ChangePassword")}
+        >
+          <Feather
+            name="lock"
+            size={24}
+            color="#6237A0"
+            style={styles.selectionIcon}
+          />
           <Text style={styles.selectionText}>Change Password</Text>
         </TouchableOpacity>
       </View>
-            <View style={styles.logoutSection}>
+      <View style={styles.logoutSection}>
         <TouchableOpacity
           style={styles.logoutButton}
-          onPress={() => navigation.replace('Login')} // ✅ Updated
+          onPress={() => navigation.replace("Login")} // ✅ Updated
         >
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>
-
     </SafeAreaView>
-    
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingTop: 20,
     paddingHorizontal: 20,
   },
   headerText: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 10,
   },
   topSection: {
     paddingTop: 80,
-    alignItems: 'center',
+    alignItems: "center",
   },
   imageWrapper: {
-    position: 'relative',
-    alignItems: 'center',
+    position: "relative",
+    alignItems: "center",
   },
   profileImage: {
     width: 100,
     height: 100,
-    borderRadius: 50
+    borderRadius: 50,
   },
   cameraIcon: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 5,
     right: 5,
   },
   phoneNumber: {
     marginTop: 8,
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
-    logoutSection: {
-    position: 'absolute',
+  logoutSection: {
+    position: "absolute",
     bottom: 30,
     left: 20,
     right: 20,
   },
   logoutButton: {
-    backgroundColor: '#6237A0',
+    backgroundColor: "#6237A0",
     paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
+    borderRadius: 100,
+    alignItems: "center",
   },
   logoutText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   selectionSection: {
     marginTop: 40,
     paddingHorizontal: 30,
   },
   selectionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 30,
   },
   selectionIcon: {
@@ -147,6 +172,6 @@ const styles = StyleSheet.create({
   },
   selectionText: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });
