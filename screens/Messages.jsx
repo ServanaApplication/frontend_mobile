@@ -4,12 +4,12 @@ import {
   View,
   Platform,
   TextInput,
-  ScrollView,
   TouchableOpacity,
   KeyboardAvoidingView,
   Modal,
   Keyboard,
   TouchableWithoutFeedback,
+  FlatList,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,7 +23,7 @@ const Messages = () => {
   const [messages, setMessages] = useState([]);
   const [showCannedMessages, setShowCannedMessages] = useState(false);
 
-  const scrollViewRef = useRef();
+  const flatListRef = useRef();
 
   const options = ["Billing", "Customer Service", "Sales"];
   const cannedMessages = [
@@ -36,28 +36,18 @@ const Messages = () => {
 
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
-    const now = new Date();
-    const newMessage = {
-      id: messages.length + 1,
-      sender: "user",
-      content: option,
-      timestamp: now.toISOString(),
-      displayTime: now.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-    setMessages((prev) => [...prev, newMessage]);
+    sendMessage(option);
   };
 
-  const sendMessage = () => {
-    if (!inputMessage.trim()) return;
+  const sendMessage = (text) => {
+    const content = text ?? inputMessage.trim();
+    if (!content) return;
 
     const now = new Date();
     const newMessage = {
       id: messages.length + 1,
       sender: "user",
-      content: inputMessage.trim(),
+      content,
       timestamp: now.toISOString(),
       displayTime: now.toLocaleTimeString([], {
         hour: "2-digit",
@@ -65,74 +55,68 @@ const Messages = () => {
       }),
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages((prev) => [newMessage, ...prev]);
     setInputMessage("");
   };
 
-  useEffect(() => {
-    scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [messages]);
+  const renderMessage = ({ item }) => (
+    <View
+      style={[
+        styles.selectedBubble,
+        { alignSelf: item.sender === "user" ? "flex-end" : "flex-start" },
+      ]}
+    >
+      <Text style={styles.selectedBubbleText}>{item.content}</Text>
+      <Text style={styles.timeText}>{item.displayTime}</Text>
+    </View>
+  );
 
   return (
-  <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} // Adjust as needed
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{ flexDirection: "row", alignItems: "center" }}
-            >
-              <Feather name="arrow-left" size={25} color="#6A1B9A" />
-              <Text style={styles.headerText}>Chats</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-              <Text style={styles.endChatText}>End chat</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Messages */}
-          <ScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={{
-              flexGrow: 1,
-              paddingHorizontal: 16,
-              paddingTop: 10,
-              paddingBottom: 20,
-              justifyContent: "flex-end",
-            }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-  bounces={true} // allows that "rubber band" feel on iOS
-  overScrollMode="always" // Android equivalent
-  scrollEventThrottle={16} // ensures smooth scroll events
-   onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
-          >
-            <Text style={styles.dateText}>Today</Text>
-
-            {messages.map((msg) => (
-              <View
-                key={msg.id}
-                style={[
-                  styles.selectedBubble,
-                  {
-                    alignSelf:
-                      msg.sender === "user" ? "flex-end" : "flex-start",
-                  },
-                ]}
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 30}
+      >
+        
+          <View style={{ flex: 1,  backgroundColor: 'rgba(255,0,0,0.1)'}}>
+            {/* Header */}
+            <View style={styles.header}>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{ flexDirection: "row", alignItems: "center" }}
               >
-                <Text style={styles.selectedBubbleText}>{msg.content}</Text>
-                <Text style={styles.timeText}>{msg.displayTime}</Text>
-              </View>
-            ))}
+                <Feather name="arrow-left" size={25} color="#6A1B9A" />
+                <Text style={styles.headerText}>Chats</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                <Text style={styles.endChatText}>End chat</Text>
+              </TouchableOpacity>
+            </View>
 
+            {/* Message List */}
+            <FlatList
+              ref={flatListRef}
+              data={messages}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderMessage}
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                paddingBottom: 20,
+                paddingTop: 10,
+                ...(messages.length === 0 && !selectedOption 
+                  ? { flexGrow: 1, justifyContent: "flex-end"}
+                  : {}
+                )
+              }}
+              inverted
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            />
+
+            {/* Options for initial selection */}
             {messages.length === 0 && !selectedOption && (
-              <>
+              <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
                 <Text style={styles.promptText}>
                   To connect you with the right support team...
                 </Text>
@@ -145,42 +129,41 @@ const Messages = () => {
                     <Text style={styles.optionText}>{option}</Text>
                   </TouchableOpacity>
                 ))}
-              </>
+              </View>
             )}
-          </ScrollView>
 
-          {/* Input Bar */}
-          <View style={styles.inputBar}>
-            <TouchableOpacity onPress={() => setShowCannedMessages(true)}>
-              <Feather
-                name="menu"
-                size={24}
-                color="#6B46C1"
-                style={{ marginRight: 10 }}
+            {/* Input Bar */}
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.inputBar}>
+              <TouchableOpacity onPress={() => setShowCannedMessages(true)}>
+                <Feather
+                  name="menu"
+                  size={24}
+                  color="#6B46C1"
+                  style={{ marginRight: 10 }}
+                />
+              </TouchableOpacity>
+              <TextInput
+                style={styles.input}
+                placeholder="Message"
+                placeholderTextColor="#aaa"
+                value={inputMessage}
+                onChangeText={setInputMessage}
+                multiline
               />
-            </TouchableOpacity>
-            <TextInput
-              style={styles.input}
-              placeholder="Message"
-              placeholderTextColor="#aaa"
-              value={inputMessage}
-              onChangeText={setInputMessage}
-              multiline
-            />
-            <TouchableOpacity onPress={sendMessage}>
-              <Feather name="send" size={24} color="#6B46C1" />
-            </TouchableOpacity>
+              <TouchableOpacity onPress={() => sendMessage()}>
+                <Feather name="send" size={24} color="#6B46C1" />
+              </TouchableOpacity>
+            </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-  </SafeAreaView>
-);
+        
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 };
 
 export default Messages;
-
-// (Use your original styles without change)
 
 const styles = StyleSheet.create({
   header: {
@@ -188,6 +171,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
     justifyContent: "space-between",
+    paddingHorizontal: 16,
   },
   headerText: {
     color: "#6A1B9A",
@@ -197,12 +181,6 @@ const styles = StyleSheet.create({
   endChatText: {
     color: "red",
     fontSize: 16,
-  },
-  dateText: {
-    alignSelf: "center",
-    marginVertical: 12,
-    color: "#999",
-    fontSize: 12,
   },
   promptText: {
     color: "#000",
@@ -259,18 +237,5 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     marginRight: 10,
     backgroundColor: "#f9f9f9",
-  },
-  cannedContainer: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 12,
-    width: "80%",
-    alignSelf: "center",
-  },
-  cannedMessage: {
-    backgroundColor: "#F5F5F5",
-    padding: 12,
-    marginVertical: 5,
-    borderRadius: 10,
   },
 });
