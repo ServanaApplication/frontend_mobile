@@ -16,7 +16,7 @@ export default function MyProfile() {
           </TouchableOpacity>
           <Text style={styles.headerText}>Profile</Text>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
           <Text style={styles.editButton}>Edit</Text>
         </TouchableOpacity>
       </View>
@@ -33,25 +33,14 @@ export default function MyProfile() {
           </View>
         </View>
 
-        {/* Profile Details */}
+        {/* Profile Details (Initially Blank) */}
         <View style={styles.detailsContainer}>
-          <ProfileItem label="Name" value="John Doe" />
-          <ProfileItem label="Email" value="john.doe@example.com" />
-          <ProfileItem label="Birthdate" value="January 1, 1990" />
-
-          {/* Street Name etc */}
-          <ProfileItem
-            label="Street Name, Building, House No."
-            value="123 Sunshine St., Bldg A, Unit 12"
-          />
-
-          {/* Combined Region, Province, City, Barangay */}
-          <ProfileItem
-            label="Region, Province, City, Barangay"
-            value="Region IV-A, Batangas, Lipa City, Sabang"
-          />
-
-          <ProfileItem label="Postal Code" value="4217" />
+          <ProfileItem label="Name" value="" />
+          <ProfileItem label="Email" value="" />
+          <ProfileItem label="Birthdate" value="" />
+          <ProfileItem label="Street Name, Building, House No." value="" />
+          <ProfileItem label="Region, Province, City, Barangay" value="" />
+          <ProfileItem label="Postal Code" value="" />
         </View>
       </ScrollView>
     </View>
@@ -62,7 +51,7 @@ function ProfileItem({ label, value }) {
   return (
     <View style={styles.profileItem}>
       <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{value}</Text>
+      <Text style={styles.value}>{typeof value === 'string' ? value : ''}</Text>
     </View>
   );
 }
@@ -87,7 +76,7 @@ const styles = StyleSheet.create({
   },
   editButton: {
     fontSize: 16,
-    color: '#8a2be2', // purple
+    color: '#8a2be2',
     fontWeight: '500',
   },
   scrollContainer: {
