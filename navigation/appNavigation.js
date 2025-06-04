@@ -10,6 +10,7 @@ import SignUpVerification from "../screens/SignUpVerification";
 import MyProfile from "../screens/MyProfile";
 import ChangePassword from "../screens/ChangePassword";
 import SuccessScreen from '../screens/SuccessScreen';
+import EditProfile from "../screens/EditProfile";
 
 
 const MyTheme = {
@@ -40,6 +41,7 @@ const AppNavigation = () => {
         <Stack.Screen name="MyProfile" component={MyProfile} />
         <Stack.Screen name="ChangePassword" component={ChangePassword} />
         <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
+        <Stack.Screen name="EditProfile" component={EditProfile} />
 
       </Stack.Navigator>
     </NavigationContainer>
