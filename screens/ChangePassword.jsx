@@ -15,15 +15,15 @@ export default function ChangePasswordScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.leftAction}>
-          <Feather
-            name="arrow-left"
-            size={20}
-            color="black"
-            style={styles.arrowIcon}
-          />
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
+        <View style={styles.leftHeader}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Feather name="arrow-left" size={24} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Change Password</Text>
+        </View>
         <TouchableOpacity onPress={() => navigation.navigate("SuccessScreen")}>
           <Text style={styles.saveText}>Save</Text>
         </TouchableOpacity>
@@ -38,12 +38,7 @@ export default function ChangePasswordScreen() {
 
       <View style={styles.inputContainer}>
         <View style={styles.inputWrapper}>
-          <Feather
-            name="lock"
-            size={20}
-            color="#999"
-            style={styles.inputIcon}
-          />
+          <Feather name="lock" size={20} color="#999" style={styles.inputIcon} />
           <TextInput
             placeholder="Current Password"
             placeholderTextColor="#999"
@@ -53,12 +48,7 @@ export default function ChangePasswordScreen() {
         </View>
 
         <View style={styles.inputWrapper}>
-          <Feather
-            name="lock"
-            size={20}
-            color="#999"
-            style={styles.inputIcon}
-          />
+          <Feather name="lock" size={20} color="#999" style={styles.inputIcon} />
           <TextInput
             placeholder="New Password"
             placeholderTextColor="#999"
@@ -68,12 +58,7 @@ export default function ChangePasswordScreen() {
         </View>
 
         <View style={styles.inputWrapper}>
-          <Feather
-            name="lock"
-            size={20}
-            color="#999"
-            style={styles.inputIcon}
-          />
+          <Feather name="lock" size={20} color="#999" style={styles.inputIcon} />
           <TextInput
             placeholder="Confirm New Password"
             placeholderTextColor="#999"
@@ -90,38 +75,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 24,
-    justifyContent: "flex-start",
+    paddingTop: 20,
+    paddingHorizontal: 20,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 40,
   },
-  leftAction: {
+  leftHeader: {
     flexDirection: "row",
     alignItems: "center",
   },
-  arrowIcon: {
-    marginRight: 4,
+  backButton: {
+    marginRight: 10,
   },
-  cancelText: {
-    fontSize: 16,
-    color: "black",
+  headerText: {
+    fontSize: 20,
+    fontWeight: "600",
   },
   saveText: {
     fontSize: 16,
-    color: "purple",
+    color: "#8a2be2",
+    fontWeight: "500",
   },
   lockIcon: {
     alignItems: "center",
-    marginBottom: 16,
+    marginVertical: 30,
   },
   title: {
     fontSize: 18,
     fontWeight: "600",
     textAlign: "center",
+    marginBottom: 10,
   },
   subtitle: {
     fontSize: 14,
