@@ -17,7 +17,10 @@ import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
-import { parsePhoneNumberFromString, getExampleNumber } from "libphonenumber-js";
+import {
+  parsePhoneNumberFromString,
+  getExampleNumber,
+} from "libphonenumber-js";
 
 const rawCountries = [
   { label: "US +1", code: "US", callingCode: "1" },
@@ -43,51 +46,46 @@ const rawCountries = [
   { label: "AE +971", code: "AE", callingCode: "971" },
   { label: "SA +966", code: "SA", callingCode: "966" },
   { label: "EG +20", code: "EG", callingCode: "20" },
-  { label: "NG +234", code: "NG", callingCode: "234" }, 
+  { label: "NG +234", code: "NG", callingCode: "234" },
 ];
 
 const getFlagEmoji = (countryCode) => {
   return countryCode
     .toUpperCase()
-    .replace(/./g, (char) =>
-      String.fromCodePoint(127397 + char.charCodeAt(0))
-    );
+    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
-
-
 
 export default function Login() {
   const navigation = useNavigation();
   const [selectedCountry, setSelectedCountry] = useState(
-  rawCountries.find(c => c.code === "PH") || rawCountries[0]
-);
- // PH
+    rawCountries.find((c) => c.code === "PH") || rawCountries[0]
+  );
+  // PH
   const [modalVisible, setModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
 
   const handleLogin = () => {
-  if (!phoneNumber?.trim() || !password?.trim()) {
-    Alert.alert("Error", "Please fill in both fields");
-    return;
-  }
+    if (!phoneNumber?.trim() || !password?.trim()) {
+      Alert.alert("Error", "Please fill in both fields");
+      return;
+    }
 
-  if (!selectedCountry?.callingCode) {
-    Alert.alert("Error", "Please select a country");
-    return;
-  }
+    if (!selectedCountry?.callingCode) {
+      Alert.alert("Error", "Please select a country");
+      return;
+    }
 
-  const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
-  const parsed = parsePhoneNumberFromString(fullNumber);
+    const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
+    const parsed = parsePhoneNumberFromString(fullNumber);
 
-  if (!parsed?.isValid()) {
-    Alert.alert("Error", "Invalid phone number for selected country");
-    return;
-  }
-  navigation.navigate("HomeScreen");
-};
-
+    if (!parsed?.isValid()) {
+      Alert.alert("Error", "Invalid phone number for selected country");
+      return;
+    }
+    navigation.navigate("HomeScreen");
+  };
 
   const handlePhoneChange = (text) => {
     const digitsOnly = text.replace(/\D/g, "");
@@ -142,7 +140,8 @@ export default function Login() {
                   style={styles.countryPicker}
                 >
                   <Text style={styles.flagText}>
-                    {getFlagEmoji(selectedCountry.code)} +{selectedCountry.callingCode}
+                    {getFlagEmoji(selectedCountry.code)} +
+                    {selectedCountry.callingCode}
                   </Text>
                   <Feather name="chevron-down" size={18} color="#848287" />
                 </TouchableOpacity>
@@ -157,41 +156,45 @@ export default function Login() {
                 />
               </View>
 
-             {/* Country Modal with Search */}
-<Modal visible={modalVisible} animationType="slide">
-  <SafeAreaView style={styles.modalContainer}>
-    <View style={styles.searchBox}>
-      <Feather name="search" size={18} color="#888" style={{ marginRight: 8 }} />
-      <TextInput
-        placeholder="Search country, code or dial"
-        placeholderTextColor="#aaa"
-        style={styles.searchInput}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-    </View>
+              {/* Country Modal with Search */}
+              <Modal visible={modalVisible} animationType="slide">
+                <SafeAreaView style={styles.modalContainer}>
+                  <View style={styles.searchBox}>
+                    <Feather
+                      name="search"
+                      size={18}
+                      color="#888"
+                      style={{ marginRight: 8 }}
+                    />
+                    <TextInput
+                      placeholder="Search country, code or dial"
+                      placeholderTextColor="#aaa"
+                      style={styles.searchInput}
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                    />
+                  </View>
 
-    <FlatList
-      data={filteredCountries}
-      keyExtractor={(item) => item.code}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.countryItem}
-          onPress={() => {
-            setSelectedCountry(item);
-            setModalVisible(false);
-            setSearchQuery("");
-          }}
-        >
-          <Text style={styles.countryText}>
-            {getFlagEmoji(item.code)} {item.label}
-          </Text>
-        </TouchableOpacity>
-      )}
-    />
-  </SafeAreaView>
-</Modal>
-
+                  <FlatList
+                    data={filteredCountries}
+                    keyExtractor={(item) => item.code}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={styles.countryItem}
+                        onPress={() => {
+                          setSelectedCountry(item);
+                          setModalVisible(false);
+                          setSearchQuery("");
+                        }}
+                      >
+                        <Text style={styles.countryText}>
+                          {getFlagEmoji(item.code)} {item.label}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </SafeAreaView>
+              </Modal>
 
               {/* Password Input */}
               <View style={styles.passwordContainer}>
@@ -231,9 +234,12 @@ export default function Login() {
 
               {/* Login Button */}
               <View style={{ marginTop: 35, width: "100%" }}>
-              <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                <Text style={styles.loginText}>Login</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.loginButton}
+                  onPress={handleLogin}
+                >
+                  <Text style={styles.loginText}>Login</Text>
+                </TouchableOpacity>
               </View>
 
               {/* Sign Up */}
@@ -365,19 +371,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   searchBox: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#333",
-  borderRadius: 10,
-  paddingHorizontal: 12,
-  marginHorizontal: 16,
-  marginBottom: 10,
-  height: 40,
-},
-searchInput: {
-  flex: 1,
-  color: "#fff",
-  fontSize: 16,
-},
-
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#333",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    height: 40,
+  },
+  searchInput: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 16,
+  },
 });
