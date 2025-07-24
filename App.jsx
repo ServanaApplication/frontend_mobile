@@ -1,13 +1,12 @@
-import {View} from 'react-native';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { store } from './store';
 import AppNavigation from './navigation/appNavigation';
-import './global.css'
-
 
 export default function App() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#1F1B24' }}>
-  <AppNavigation />
-</View>
+    <Provider store={store}>
+      <AppNavigation />
+    </Provider>
   );
 }
-  
