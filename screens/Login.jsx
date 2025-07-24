@@ -21,6 +21,7 @@ import {
   parsePhoneNumberFromString,
   getExampleNumber,
 } from "libphonenumber-js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const rawCountries = [
   { label: "US +1", code: "US", callingCode: "1" },
@@ -54,6 +55,7 @@ const getFlagEmoji = (countryCode) => {
     .toUpperCase()
     .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
+const API_URL = "http://192.168.137.1:5000"; // Replace with your backend URL
 
 export default function Login() {
   const navigation = useNavigation();
@@ -66,7 +68,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!phoneNumber?.trim() || !password?.trim()) {
       Alert.alert("Error", "Please fill in both fields");
       return;
@@ -84,9 +86,39 @@ export default function Login() {
       Alert.alert("Error", "Invalid phone number for selected country");
       return;
     }
-    navigation.navigate("HomeScreen");
-  };
+    try {
+      const response = await fetch(`${API_URL}/clientAccount/logincl`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_country_code: selectedCountry.code,
+          client_number: phoneNumber,
+          client_password: password,
+        }),
+      });
 
+      const result = await response.json();
+
+      if (!response.ok) {
+        Alert.alert(
+          "Login Failed",
+          result.error || "An error occurred during login"
+        );
+        return;
+      }
+      // ✅ Save JWT token after successful login
+      await AsyncStorage.setItem("token", result.token);
+      console.log("Login successful:", result);
+
+      navigation.navigate("HomeScreen");
+    } catch (error) {
+      console.error("Login error:", error);
+
+      Alert.alert("Error", "Something went wrong. PLease try again.");
+    }
+  };
   const handlePhoneChange = (text) => {
     const digitsOnly = text.replace(/\D/g, "");
     try {
