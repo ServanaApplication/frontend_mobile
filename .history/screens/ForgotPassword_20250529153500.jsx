@@ -3,8 +3,9 @@ import {
   Text,
   View,
   StatusBar,
-  Platform,
+  Image,
   TextInput,
+  Platform,
   ScrollView,
   TouchableOpacity,
   Alert,
@@ -12,16 +13,13 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import React, { useState } from "react";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
 import { parsePhoneNumberFromString, getExampleNumber } from "libphonenumber-js";
-import { useDispatch } from "react-redux";
-import axios from "axios";
-import { setUser, setLoading, setError } from "../slices/userSlice";
 
-// Country Data (same as Login screen)
+// Country Data
 const rawCountries = [
   { label: "US +1", code: "US", callingCode: "1" },
   { label: "PH +63", code: "PH", callingCode: "63" },
@@ -57,20 +55,22 @@ const getFlagEmoji = (countryCode) => {
     );
 };
 
-const API_URL = "http://192.168.137.1:5000"; // Replace with your backend URL
-
-const SignUp = () => {
+const ForgotPassword = () => {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const [selectedCountry, setSelectedCountry] = useState(rawCountries[0]); // default US
+
+  const [selectedCountry, setSelectedCountry] = useState(rawCountries[1]); // PH
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [secureText, setSecureText] = useState(true);
-  const [secureConfirm, setSecureConfirm] = useState(true);
+
+  const filteredCountries = rawCountries.filter((country) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      country.label.toLowerCase().includes(query) ||
+      country.callingCode.includes(query) ||
+      country.code.toLowerCase().includes(query)
+    );
+  });
 
   const handlePhoneChange = (text) => {
     const digitsOnly = text.replace(/\D/g, "");
@@ -87,83 +87,38 @@ const SignUp = () => {
     }
   };
 
-  const filteredCountries = rawCountries.filter((country) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      country.label.toLowerCase().includes(query) ||
-      country.callingCode.includes(query) ||
-      country.code.toLowerCase().includes(query)
-    );
-  });
-
-  const handleSignUp = async () => {
+  const handleSendCode = () => {
+    const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
+    const parsed = parsePhoneNumberFromString(fullNumber);
     if (!phoneNumber.trim()) {
       Alert.alert("Error", "Please enter a valid phone number");
-      return;
-    } else if (!password || !confirmPassword) {
-      Alert.alert("Error", "Please fill out all password fields");
-      return;
-    } else if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
-      return;
+    } else if (!parsed?.isValid()) {
+      Alert.alert("Error", "Invalid phone number for selected country");
+    } else {
+      Alert.alert("Success", `Code sent to ${parsed.number}`);
+      navigation.navigate("Verification")
     }
-    dispatch(setLoading(true));
-    try {
-       const now = new Date().toISOString();
-    const client_country_code = selectedCountry.code;
-    const client_number = phoneNumber;
-    const client_password = password;
-    const client_created_at = now;
-     
-    const response = await axios.post(`${API_URL}/clientAccount/registercl`, {
-      client_country_code,
-      client_number,
-      client_password,
-      client_created_at,
-    });
-
-   dispatch(setUser(response.data.client));
-    dispatch(setError(null));
-    Alert.alert("Success", "Signed up successfully!");
-    navigation.navigate("SignUpVerification");
-  } catch (error) {
-    console.log('AXIOS ERROR:', error.response?.data, error);
-    console.log(error);
-    dispatch(setError(error.response?.data?.error || "Signup failed"));
-    Alert.alert("Error", error.response?.data?.error || "Signup failed");
-  } finally {
-    dispatch(setLoading(false));
-  }
-};
+  };
 
   return (
     <SafeAreaProvider>
-      <StatusBar
-        backgroundColor="transparent"
-        barStyle="light-content"
-        translucent
-      />
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1B24", paddingHorizontal: 16 }}>
+      <StatusBar backgroundColor="#1F1B24" barStyle="light-content" />
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1B24" }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
         >
           <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-            {/* Header */}
-            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 20 }}>
-              <TouchableOpacity
-                onPress={() => navigation.navigate("Login")}
-                style={{ flexDirection: "row", alignItems: "center" }}
-              >
-                <Feather name="arrow-left" size={25} color="#848287" />
-                <Text style={{ color: "#fff", fontSize: 20, marginLeft: 8 }}>Register</Text>
-              </TouchableOpacity>
-            </View> 
+            <View style={styles.container}>
+              <Image
+                source={require("../assets/icon.png")}
+                resizeMode="contain"
+                style={styles.logo}
+              />
+              <Text style={styles.title}>Forgot Password</Text>
+              <Text style={styles.subtitle}>Enter your phone number to reset your password</Text>
 
-            {/* Form */}
-            <View style={{ marginTop: 60 }}>
-              {/* Phone Input with Picker */}
               <View style={styles.inputContainer}>
                 <TouchableOpacity
                   onPress={() => setModalVisible(true)}
@@ -176,16 +131,15 @@ const SignUp = () => {
                 </TouchableOpacity>
                 <View style={styles.separator} />
                 <TextInput
+                  value={phoneNumber}
+                  onChangeText={handlePhoneChange}
                   placeholder="Phone Number"
                   placeholderTextColor="#848287"
                   keyboardType="phone-pad"
-                  value={phoneNumber || ""}
-                  onChangeText={handlePhoneChange}
                   style={styles.phoneInput}
                 />
               </View>
 
-              {/* Modal Picker */}
               <Modal visible={modalVisible} animationType="slide">
                 <SafeAreaView style={styles.modalContainer}>
                   <View style={styles.searchBox}>
@@ -215,54 +169,13 @@ const SignUp = () => {
                           {getFlagEmoji(item.code)} {item.label}
                         </Text>
                       </TouchableOpacity>
-                    )} 
+                    )}
                   />
                 </SafeAreaView>
               </Modal>
 
-              {/* Password Input */}
-              <View style={styles.passwordContainer}>
-                <Feather name="lock" size={20} color="#848287" style={styles.lockIcon} />
-                <TextInput
-                  value={password || ""}
-                  onChangeText={setPassword}
-                  secureTextEntry={secureText}
-                  placeholder="Password"
-                  placeholderTextColor="#848287"
-                  style={styles.passwordInput}
-                />
-                <TouchableOpacity onPress={() => setSecureText(!secureText)} style={styles.eyeIcon}>
-                  <Feather name={secureText ? "eye-off" : "eye"} size={22} color="#848287" />
-                </TouchableOpacity>
-              </View>
-
-              {/* Confirm Password */}
-              <View style={styles.passwordContainer}>
-                <Feather name="lock" size={20} color="#848287" style={styles.lockIcon} />
-                <TextInput
-                  value={confirmPassword || ""}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry={secureConfirm}
-                  placeholder="Confirm Password"
-                  placeholderTextColor="#848287"
-                  style={styles.passwordInput}
-                />
-                <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)} style={styles.eyeIcon}>
-                  <Feather name={secureConfirm ? "eye-off" : "eye"} size={22} color="#848287" />
-                </TouchableOpacity>
-              </View>
-
-              {/* Sign Up */}
-              <TouchableOpacity
-                onPress={handleSignUp}
-                style={{
-                  backgroundColor: "#6237A0", 
-                  borderRadius: 10,
-                  padding: 16,
-                  marginTop: 38 ,
-                }}
-              >
-                <Text style={styles.signup}>Sign Up</Text>
+              <TouchableOpacity style={styles.sendButton} onPress={handleSendCode}>
+                <Text style={styles.sendText}>Send Code</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -272,17 +185,39 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
-
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#1F1B24",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  logo: {
+    width: 250,
+    height: 250,
+  },
+  title: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+  subtitle: {
+    color: "#aaa",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: 20,
+  },
   inputContainer: {
     flexDirection: "row",
-    backgroundColor: "#444148",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
     alignItems: "center",
-    marginBottom: 20,
+    backgroundColor: "#2B2B2B",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginTop: 10,
+    width: "100%",
   },
   countryPicker: {
     flexDirection: "row",
@@ -290,19 +225,32 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   flagText: {
-    color: "#fff",
+    color: "white",
     fontSize: 16,
-    marginRight: 4,
+    marginRight: 6,
   },
   separator: {
     width: 1,
-    height: 18,
+    height: "70%",
     backgroundColor: "#5E5C63",
     marginRight: 8,
   },
   phoneInput: {
-    color: "#fff",
     flex: 1,
+    color: "white",
+    paddingVertical: 12,
+  },
+  sendButton: {
+    backgroundColor: "#6237A0",
+    borderRadius: 8,
+    paddingVertical: 14,
+    marginTop: 30,
+    width: "100%",
+  },
+  sendText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
     fontSize: 16,
   },
   modalContainer: {
@@ -313,50 +261,25 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#333",
+    backgroundColor: "#2B2B2B",
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 10,
     marginBottom: 12,
   },
   searchInput: {
     flex: 1,
-    color: "#fff",
-    fontSize: 16,
+    color: "white",
+    paddingVertical: 10,
   },
   countryItem: {
     paddingVertical: 12,
-    borderBottomColor: "#333",
+    borderBottomColor: "#444",
     borderBottomWidth: 1,
   },
   countryText: {
-    color: "#fff",
+    color: "white",
     fontSize: 16,
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    backgroundColor: "#444148",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  lockIcon: {
-    marginRight: 10,
-  },
-  passwordInput: {
-    flex: 1,
-    color: "#fff",
-    fontSize: 16,
-  },
-  eyeIcon: {
-    marginLeft: 10,
-  },
-  signup: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
   },
 });
+
+export default ForgotPassword;

@@ -17,9 +17,6 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Feather from "react-native-vector-icons/Feather";
 import { parsePhoneNumberFromString, getExampleNumber } from "libphonenumber-js";
-import { useDispatch } from "react-redux";
-import axios from "axios";
-import { setUser, setLoading, setError } from "../slices/userSlice";
 
 // Country Data (same as Login screen)
 const rawCountries = [
@@ -57,11 +54,8 @@ const getFlagEmoji = (countryCode) => {
     );
 };
 
-const API_URL = "http://192.168.137.1:5000"; // Replace with your backend URL
-
 const SignUp = () => {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
   const [selectedCountry, setSelectedCountry] = useState(rawCountries[0]); // default US
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -96,46 +90,6 @@ const SignUp = () => {
     );
   });
 
-  const handleSignUp = async () => {
-    if (!phoneNumber.trim()) {
-      Alert.alert("Error", "Please enter a valid phone number");
-      return;
-    } else if (!password || !confirmPassword) {
-      Alert.alert("Error", "Please fill out all password fields");
-      return;
-    } else if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
-      return;
-    }
-    dispatch(setLoading(true));
-    try {
-       const now = new Date().toISOString();
-    const client_country_code = selectedCountry.code;
-    const client_number = phoneNumber;
-    const client_password = password;
-    const client_created_at = now;
-     
-    const response = await axios.post(`${API_URL}/clientAccount/registercl`, {
-      client_country_code,
-      client_number,
-      client_password,
-      client_created_at,
-    });
-
-   dispatch(setUser(response.data.client));
-    dispatch(setError(null));
-    Alert.alert("Success", "Signed up successfully!");
-    navigation.navigate("SignUpVerification");
-  } catch (error) {
-    console.log('AXIOS ERROR:', error.response?.data, error);
-    console.log(error);
-    dispatch(setError(error.response?.data?.error || "Signup failed"));
-    Alert.alert("Error", error.response?.data?.error || "Signup failed");
-  } finally {
-    dispatch(setLoading(false));
-  }
-};
-
   return (
     <SafeAreaProvider>
       <StatusBar
@@ -159,7 +113,7 @@ const SignUp = () => {
                 <Feather name="arrow-left" size={25} color="#848287" />
                 <Text style={{ color: "#fff", fontSize: 20, marginLeft: 8 }}>Register</Text>
               </TouchableOpacity>
-            </View> 
+            </View>
 
             {/* Form */}
             <View style={{ marginTop: 60 }}>
@@ -179,7 +133,7 @@ const SignUp = () => {
                   placeholder="Phone Number"
                   placeholderTextColor="#848287"
                   keyboardType="phone-pad"
-                  value={phoneNumber || ""}
+                  value={phoneNumber}
                   onChangeText={handlePhoneChange}
                   style={styles.phoneInput}
                 />
@@ -215,7 +169,7 @@ const SignUp = () => {
                           {getFlagEmoji(item.code)} {item.label}
                         </Text>
                       </TouchableOpacity>
-                    )} 
+                    )}
                   />
                 </SafeAreaView>
               </Modal>
@@ -224,7 +178,7 @@ const SignUp = () => {
               <View style={styles.passwordContainer}>
                 <Feather name="lock" size={20} color="#848287" style={styles.lockIcon} />
                 <TextInput
-                  value={password || ""}
+                  value={password}
                   onChangeText={setPassword}
                   secureTextEntry={secureText}
                   placeholder="Password"
@@ -240,7 +194,7 @@ const SignUp = () => {
               <View style={styles.passwordContainer}>
                 <Feather name="lock" size={20} color="#848287" style={styles.lockIcon} />
                 <TextInput
-                  value={confirmPassword || ""}
+                  value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry={secureConfirm}
                   placeholder="Confirm Password"
@@ -254,7 +208,18 @@ const SignUp = () => {
 
               {/* Sign Up */}
               <TouchableOpacity
-                onPress={handleSignUp}
+                onPress={() => {
+                  if (!phoneNumber.trim()) {
+                    Alert.alert("Error", "Please enter a valid phone number");
+                  } else if (!password || !confirmPassword) {
+                    Alert.alert("Error", "Please fill out all password fields");
+                  } else if (password !== confirmPassword) {
+                    Alert.alert("Error", "Passwords do not match");
+                  } else {
+                    Alert.alert("Success", "Signed up successfully!");
+                    navigation.navigate("SignUpVerification");
+                  }
+                }}
                 style={{
                   backgroundColor: "#6237A0", 
                   borderRadius: 10,
