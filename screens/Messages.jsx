@@ -22,6 +22,9 @@ import EndChatLabel from "../components/EndChatLabel";
 import styles from "../styles/messageStyles";
 import { getDateLabel } from "../utils/getDateLabel";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../apiConfig"; // your IP address module
+
 const Messages = ({ navigation }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [inputMessage, setInputMessage] = useState("");
