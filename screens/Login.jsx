@@ -69,56 +69,63 @@ export default function Login() {
   const [secureText, setSecureText] = useState(true);
 
   const handleLogin = async () => {
-    if (!phoneNumber?.trim() || !password?.trim()) {
-      Alert.alert("Error", "Please fill in both fields");
+  if (!phoneNumber?.trim() || !password?.trim()) {
+    Alert.alert("Error", "Please fill in both fields");
+    return;
+  }
+
+  if (!selectedCountry?.callingCode) {
+    Alert.alert("Error", "Please select a country");
+    return;
+  }
+
+  const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
+  const parsed = parsePhoneNumberFromString(fullNumber);
+
+  if (!parsed?.isValid()) {
+    Alert.alert("Error", "Invalid phone number for selected country");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/clientAccount/logincl`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_country_code: selectedCountry.code,
+        client_number: phoneNumber,
+        client_password: password,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      Alert.alert("Login Failed", result.error || "An error occurred during login");
       return;
     }
 
-    if (!selectedCountry?.callingCode) {
-      Alert.alert("Error", "Please select a country");
-      return;
-    }
+    // ✅ Save JWT token
+    await AsyncStorage.setItem("token", result.token);
 
-    const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
-    const parsed = parsePhoneNumberFromString(fullNumber);
+    // ✅ Save chat_group_id if available
+    if (result.chat_group_id) {
+  await AsyncStorage.setItem("chat_group_id", result.chat_group_id.toString());
+} else {
+  console.warn("No chat_group_id returned from backend.");
+}
 
-    if (!parsed?.isValid()) {
-      Alert.alert("Error", "Invalid phone number for selected country");
-      return;
-    }
-    try {
-      const response = await fetch(`${API_URL}/clientAccount/logincl`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          client_country_code: selectedCountry.code,
-          client_number: phoneNumber,
-          client_password: password,
-        }),
-      });
 
-      const result = await response.json();
+    console.log("Login successful:", result);
+    navigation.navigate("HomeScreen");
+  } catch (error) {
+    console.error("Login error:", error);
+    Alert.alert("Error", "Something went wrong. Please try again.");
+  }
+};
 
-      if (!response.ok) {
-        Alert.alert(
-          "Login Failed",
-          result.error || "An error occurred during login"
-        );
-        return;
-      }
-      // ✅ Save JWT token after successful login
-      await AsyncStorage.setItem("token", result.token);
-      console.log("Login successful:", result);
-
-      navigation.navigate("HomeScreen");
-    } catch (error) {
-      console.error("Login error:", error);
-
-      Alert.alert("Error", "Something went wrong. PLease try again.");
-    }
-  };
   const handlePhoneChange = (text) => {
     const digitsOnly = text.replace(/\D/g, "");
     try {
