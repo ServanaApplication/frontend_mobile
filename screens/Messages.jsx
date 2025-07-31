@@ -9,6 +9,7 @@ import {
   InteractionManager,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import axios from "axios";
 
 import ChatHeader from "../components/ChatHeader";
 import MessageItem from "../components/MessageItem";
@@ -23,7 +24,7 @@ import styles from "../styles/messageStyles";
 import { getDateLabel } from "../utils/getDateLabel";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BASE_URL from "../apiConfig"; // your IP address module
+import BASE_URL from "../apiConfig";
 
 const Messages = ({ navigation }) => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -31,6 +32,7 @@ const Messages = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
   const [showEndChatModal, setShowEndChatModal] = useState(false);
   const [chatEnded, setChatEnded] = useState(false);
+  const [chatGroupId, setChatGroupId] = useState(null);
 
   const flatListRef = useRef();
   const inputRef = useRef();
@@ -44,15 +46,59 @@ const Messages = ({ navigation }) => {
     "I will escalate this issue to our support team.",
   ];
 
-  const handleOptionSelect = (option) => {
-    setSelectedOption(option);
-    sendMessage(option);
+  useEffect(() => {
+    const loadChatGroupId = async () => {
+      const storedGroupId = await AsyncStorage.getItem("chat_group_id");
+      if (storedGroupId) {
+        setChatGroupId(storedGroupId);
+      } else {
+        console.warn("No chat_group_id found in AsyncStorage.");
+      }
+    };
+    loadChatGroupId();
+  }, []);
+
+  useEffect(() => {
+    if (chatGroupId) {
+      fetchMessages();
+    }
+  }, [chatGroupId]);
+
+  const fetchMessages = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const response = await axios.get(`${BASE_URL}/messages/group/${chatGroupId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const loadedMessages = response.data.map((msg) => ({
+        id: msg.chat_id.toString(),
+        sender: msg.client_id ? "user" : "agent",
+        content: msg.chat_body,
+        timestamp: msg.chat_created_at,
+        displayTime: new Date(msg.chat_created_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }));
+
+      setMessages(loadedMessages);
+    } catch (err) {
+      console.error("Fetch messages failed:", err.message);
+    }
   };
 
-  const sendMessage = (text = null) => {
+  const sendMessage = async (text = null, groupIdOverride = null) => {
     const content = (text ?? inputMessage).trim();
-    if (!content) return;
-
+    if (!content) {
+      console.warn("Message content is empty.");
+      return;
+    }
+    const finalGroupId = groupIdOverride ?? chatGroupId;
+    if (!finalGroupId) {
+      console.warn("Chat Group ID is missing.");
+      return;
+    }
     const now = new Date();
     const newMessage = {
       id: `${Date.now()}`,
@@ -64,9 +110,25 @@ const Messages = ({ navigation }) => {
         minute: "2-digit",
       }),
     };
-
     setMessages((prev) => [...prev, newMessage]);
     setInputMessage("");
+    try {
+      const token = await AsyncStorage.getItem("token");
+      await axios.post(
+        `${BASE_URL}/messages`,
+        {
+          chat_body: content,
+          chat_group_id: finalGroupId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Failed to send message:", error.message);
+    }
   };
 
   const focusMainInput = () => {
@@ -77,7 +139,32 @@ const Messages = ({ navigation }) => {
     });
   };
 
-  // 🔁 Group messages with date label and end chat label
+  const handleOptionSelect = async (dept) => {
+    setSelectedOption(dept.dept_name);
+    setChatEnded(false);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const res = await axios.get(`${BASE_URL}/messages/latest`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const groupId = res.data.chat_group_id;
+      if (!groupId) {
+        console.warn("No chat_group_id found.");
+        return;
+      }
+      await AsyncStorage.setItem("chat_group_id", groupId.toString());
+      setChatGroupId(groupId);
+      await axios.patch(
+        `${BASE_URL}/clientAccount/chat_group/${groupId}/set-department`,
+        { dept_id: dept.dept_id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await sendMessage(dept.dept_name, groupId);
+    } catch (error) {
+      console.error("Error assigning department or fetching chat group:", error.message);
+    }
+  };
+
   const groupedMessages = [];
   let lastDate = null;
   messages.forEach((msg, index) => {
@@ -94,13 +181,9 @@ const Messages = ({ navigation }) => {
   });
 
   if (chatEnded && messages.length > 0) {
-    groupedMessages.push({
-      id: "end-chat-label",
-      type: "endChat",
-    });
+    groupedMessages.push({ id: "end-chat-label", type: "endChat" });
   }
 
-  // 🔽 Scroll to bottom on new message or keyboard show
   const scrollToBottom = () => {
     flatListRef.current?.scrollToEnd({ animated: true });
   };
@@ -127,7 +210,6 @@ const Messages = ({ navigation }) => {
               navigation={navigation}
               onEndChat={() => setShowEndChatModal(true)}
             />
-
             <FlatList
               ref={flatListRef}
               data={groupedMessages}
@@ -148,11 +230,9 @@ const Messages = ({ navigation }) => {
               keyboardShouldPersistTaps="handled"
               onContentSizeChange={() => scrollToBottom()}
             />
-
             {messages.length === 0 && !selectedOption && (
-              <InitialOptions onSelect={handleOptionSelect} />
+              <InitialOptions onSelect={handleOptionSelect} navigation={navigation} />
             )}
-
             <InputBar
               ref={inputRef}
               inputMessage={inputMessage}
@@ -160,7 +240,6 @@ const Messages = ({ navigation }) => {
               onSend={() => sendMessage()}
               onShowCannedMessages={() => modalizeRef.current?.open()}
             />
-
             <CannedMessagesModal
               ref={modalizeRef}
               cannedMessages={cannedMessages}
@@ -172,7 +251,6 @@ const Messages = ({ navigation }) => {
               setInputMessage={setInputMessage}
               onFocusMainInput={focusMainInput}
             />
-
             <EndChatModal
               visible={showEndChatModal}
               onCancel={() => setShowEndChatModal(false)}
