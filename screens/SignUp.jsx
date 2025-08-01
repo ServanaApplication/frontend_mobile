@@ -20,6 +20,7 @@ import { parsePhoneNumberFromString, getExampleNumber } from "libphonenumber-js"
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { setUser, setLoading, setError } from "../slices/userSlice";
+import BASE_URL from "../apiConfig";
 
 // Country Data (same as Login screen)
 const rawCountries = [
@@ -57,7 +58,7 @@ const getFlagEmoji = (countryCode) => {
     );
 };
 
-const API_URL = "http://192.168.137.1:5000"; // Replace with your backend URL
+
 
 const SignUp = () => {
   const navigation = useNavigation();
@@ -115,7 +116,7 @@ const SignUp = () => {
     const client_password = password;
     const client_created_at = now;
      
-    const response = await axios.post(`${API_URL}/clientAccount/registercl`, {
+    const response = await axios.post(`${BASE_URL}/clientAccount/registercl`, {
       client_country_code,
       client_number,
       client_password,

@@ -22,6 +22,7 @@ import {
   getExampleNumber,
 } from "libphonenumber-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BASE_URL from "../apiConfig";
 
 const rawCountries = [
   { label: "US +1", code: "US", callingCode: "1" },
@@ -55,7 +56,6 @@ const getFlagEmoji = (countryCode) => {
     .toUpperCase()
     .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
-const API_URL = "http://192.168.137.1:5000"; // Replace with your backend URL
 
 export default function Login() {
   const navigation = useNavigation();
@@ -88,7 +88,7 @@ export default function Login() {
   }
 
   try {
-    const response = await fetch(`${API_URL}/clientAccount/logincl`, {
+    const response = await fetch(`${BASE_URL}/clientAccount/logincl`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
