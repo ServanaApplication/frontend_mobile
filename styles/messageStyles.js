@@ -36,13 +36,12 @@ export default StyleSheet.create({
     fontSize: 16,
   },
   selectedBubble: {
-    backgroundColor: "#6A1B9A",
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 12,
     maxWidth: "70%",
     marginVertical: 8,
   },
+
   selectedBubbleText: {
     color: "#fff",
     fontSize: 16,
