@@ -2,10 +2,8 @@ import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import styles from "../styles/messageStyles";
 
-const AGENT_NAME = "Agent-Maria";
-const AGENT_AVATAR = require("../assets/agent.jpg");
 
-const MessageItem = ({ item }) => {
+const MessageItem = ({ item, agentInfo }) => {
   const isUser = item.sender === "user";
 
   return (
@@ -16,12 +14,22 @@ const MessageItem = ({ item }) => {
       ]}
     >
       {/* Agent Info */}
-      {!isUser && (
+       {!isUser && (
         <View style={localStyles.agentInfoContainer}>
-          <Image source={AGENT_AVATAR} style={localStyles.avatar} />
-          <Text style={localStyles.agentName}>{AGENT_NAME}</Text>
+          <Image
+            source={
+              agentInfo?.avatar
+                ? { uri: agentInfo.avatar }
+                : require("../assets/agent.jpg")
+            }
+            style={localStyles.avatar}
+          />
+          <Text style={localStyles.agentName}>
+            {agentInfo?.name.split (" ")[0] || "Agent"}
+          </Text>
         </View>
       )}
+
 
       {/* Message Bubble */}
       <View

@@ -33,6 +33,7 @@ const Messages = ({ navigation }) => {
   const [showEndChatModal, setShowEndChatModal] = useState(false);
   const [chatEnded, setChatEnded] = useState(false);
   const [chatGroupId, setChatGroupId] = useState(null);
+  const [agentInfo, setAgentInfo] = useState({ name: "", avatar: "" });
 
   const flatListRef = useRef();
   const inputRef = useRef();
@@ -63,6 +64,30 @@ const Messages = ({ navigation }) => {
       fetchMessages();
     }
   }, [chatGroupId]);
+
+
+  useEffect(() => {
+  if (chatGroupId) {
+
+    const fetchAgentInfo = async () => {
+      try {
+        console.log("📡 AGENT FETCH URL:", `${BASE_URL}/agent/${chatGroupId}`);
+        console.log("💬 ChatGroupID:", chatGroupId);
+
+        const response = await axios.get(`${BASE_URL}/agent/${chatGroupId}`);
+       console.log("Fetching agent from:", `/agent/${chatGroupId}`);
+        setAgentInfo(response.data); // includes `name` and `image`
+       
+
+      } catch (error) {
+        console.error("❌ Failed to fetch agent info:", error);
+      }
+    };
+
+    fetchAgentInfo();
+  }
+}, [chatGroupId]);
+
 
   const fetchMessages = async () => {
     try {
@@ -217,7 +242,7 @@ const Messages = ({ navigation }) => {
               renderItem={({ item }) => {
                 if (item.type === "label") return <DateLabel label={item.label} />;
                 if (item.type === "endChat") return <EndChatLabel />;
-                return <MessageItem item={item} />;
+                return <MessageItem item={item} agentInfo={agentInfo} />;
               }}
               contentContainerStyle={{
                 paddingHorizontal: 16,
