@@ -30,7 +30,7 @@ const Dashboard = () => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.topBlock}>
-          <Text style={styles.header}>Hi Juan</Text>
+          <Text style={styles.header}>Hi Kurt</Text>
           <Text style={styles.subheader}>Helping you, one chat at a time.</Text>
 
           <View style={styles.card}>

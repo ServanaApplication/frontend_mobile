@@ -1,20 +1,15 @@
 import React, { useState } from "react";
-import {
-  View,
-  Image,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
+import { View, Image, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native"; // ✅ Added
+import { useSelector } from "react-redux";
 
 export default function ProfileScreen() {
   const [image, setImage] = useState(null);
   const navigation = useNavigation(); // ✅ Added
-
+  const client = useSelector((state) => state.client.data);
   const pickImage = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -58,7 +53,7 @@ export default function ProfileScreen() {
               style={styles.cameraIcon}
             />
           </TouchableOpacity>
-          <Text style={styles.phoneNumber}>+1 234 567 8901</Text>
+          <Text style={styles.phoneNumber}>{client.client_country_code}  { client.client_number}</Text>
         </View>
       </View>
 

@@ -9,6 +9,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import HomeScreen from '../screens/Dashboard';
 import Messages from '../screens/Messages';
 import Profile from '../screens/Profile';
+import Test from '../screens/Test';
 // import HomeScreen from '../screens/HomeScreen';
 
 const Tab = createBottomTabNavigator();
@@ -31,6 +32,8 @@ const BottomTabs = () => {
             iconName = 'message-circle';
           } else if (route.name === 'Profile') {
             iconName = 'user';
+          } else if (route.name === 'Test') {
+            iconName = 'file-text';
           }
 
           return (
@@ -47,6 +50,7 @@ const BottomTabs = () => {
       <Tab.Screen name="Dashboard" component={HomeScreen} />
       <Tab.Screen name="Messages" component={Messages} />
       <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen name="Test" component={Test} />
     </Tab.Navigator>
   );
 };

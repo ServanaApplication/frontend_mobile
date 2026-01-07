@@ -21,7 +21,10 @@ import {
   parsePhoneNumberFromString,
   getExampleNumber,
 } from "libphonenumber-js";
+import { ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch } from "react-redux";
+import { setClient } from "../slices/clientSlice";
 
 const rawCountries = [
   { label: "US +1", code: "US", callingCode: "1" },
@@ -55,10 +58,15 @@ const getFlagEmoji = (countryCode) => {
     .toUpperCase()
     .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
-const API_URL = "http://192.168.137.1:5000"; // Replace with your backend URL
+// const API_URL = "http://192.168.137.1:5000"; // Replace with your backend URL
+const API_URL = Platform.OS === 'web' 
+  ? 'http://localhost:5000'
+  : 'http://10.120.60.79:5000';
 
 export default function Login() {
+  const dispatch = useDispatch()
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(
     rawCountries.find((c) => c.code === "PH") || rawCountries[0]
   );
@@ -74,18 +82,8 @@ export default function Login() {
       return;
     }
 
-    if (!selectedCountry?.callingCode) {
-      Alert.alert("Error", "Please select a country");
-      return;
-    }
+    setLoading(true); // 🔄 start loading
 
-    const fullNumber = `+${selectedCountry.callingCode}${phoneNumber}`;
-    const parsed = parsePhoneNumberFromString(fullNumber);
-
-    if (!parsed?.isValid()) {
-      Alert.alert("Error", "Invalid phone number for selected country");
-      return;
-    }
     try {
       const response = await fetch(`${API_URL}/clientAccount/logincl`, {
         method: "POST",
@@ -102,23 +100,22 @@ export default function Login() {
       const result = await response.json();
 
       if (!response.ok) {
-        Alert.alert(
-          "Login Failed",
-          result.error || "An error occurred during login"
-        );
+        Alert.alert("Login Failed", result.error || "Login error");
         return;
       }
-      // ✅ Save JWT token after successful login
+
       await AsyncStorage.setItem("token", result.token);
-      console.log("Login successful:", result);
+
+      dispatch(setClient({ client: result.client, token: result.token }));
 
       navigation.navigate("HomeScreen");
     } catch (error) {
-      console.error("Login error:", error);
-
-      Alert.alert("Error", "Something went wrong. PLease try again.");
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false); // ✅ stop loading (always)
     }
   };
+
   const handlePhoneChange = (text) => {
     const digitsOnly = text.replace(/\D/g, "");
     try {
@@ -267,10 +264,15 @@ export default function Login() {
               {/* Login Button */}
               <View style={{ marginTop: 35, width: "100%" }}>
                 <TouchableOpacity
-                  style={styles.loginButton}
+                  style={[styles.loginButton, loading && { opacity: 0.7 }]}
                   onPress={handleLogin}
+                  disabled={loading}
                 >
-                  <Text style={styles.loginText}>Login</Text>
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.loginText}>Login</Text>
+                  )}
                 </TouchableOpacity>
               </View>
 

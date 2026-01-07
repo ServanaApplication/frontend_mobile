@@ -16,10 +16,15 @@ import React, { useState } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Feather from "react-native-vector-icons/Feather";
-import { parsePhoneNumberFromString, getExampleNumber } from "libphonenumber-js";
+import {
+  parsePhoneNumberFromString,
+  getExampleNumber,
+} from "libphonenumber-js";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { setUser, setLoading, setError } from "../slices/userSlice";
+import { ActivityIndicator } from "react-native";
+import { useSelector } from "react-redux";
 
 // Country Data (same as Login screen)
 const rawCountries = [
@@ -52,12 +57,13 @@ const rawCountries = [
 const getFlagEmoji = (countryCode) => {
   return countryCode
     .toUpperCase()
-    .replace(/./g, (char) =>
-      String.fromCodePoint(127397 + char.charCodeAt(0))
-    );
+    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
 
-const API_URL = "http://192.168.137.1:5000"; // Replace with your backend URL
+// const API_URL = "http://192.168.137.1:5000"; // Replace with your backend URL
+const API_URL = Platform.OS === 'web' 
+  ? 'http://localhost:5000'
+  : 'http://10.120.60.79:5000';
 
 const SignUp = () => {
   const navigation = useNavigation();
@@ -65,6 +71,8 @@ const SignUp = () => {
   const [selectedCountry, setSelectedCountry] = useState(rawCountries[0]); // default US
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { loading } = useSelector((state) => state.user);
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
@@ -109,32 +117,32 @@ const SignUp = () => {
     }
     dispatch(setLoading(true));
     try {
-       const now = new Date().toISOString();
-    const client_country_code = selectedCountry.code;
-    const client_number = phoneNumber;
-    const client_password = password;
-    const client_created_at = now;
-     
-    const response = await axios.post(`${API_URL}/clientAccount/registercl`, {
-      client_country_code,
-      client_number,
-      client_password,
-      client_created_at,
-    });
+      const now = new Date().toISOString();
+      const client_country_code = selectedCountry.code;
+      const client_number = phoneNumber;
+      const client_password = password;
+      const client_created_at = now;
 
-   dispatch(setUser(response.data.client));
-    dispatch(setError(null));
-    Alert.alert("Success", "Signed up successfully!");
-    navigation.navigate("SignUpVerification");
-  } catch (error) {
-    console.log('AXIOS ERROR:', error.response?.data, error);
-    console.log(error);
-    dispatch(setError(error.response?.data?.error || "Signup failed"));
-    Alert.alert("Error", error.response?.data?.error || "Signup failed");
-  } finally {
-    dispatch(setLoading(false));
-  }
-};
+      const response = await axios.post(`${API_URL}/clientAccount/registercl`, {
+        client_country_code,
+        client_number,
+        client_password,
+        client_created_at,
+      });
+
+      dispatch(setUser(response.data.client));
+      dispatch(setError(null));
+      Alert.alert("Success", "Signed up successfully!");
+      navigation.navigate("SignUpVerification");
+    } catch (error) {
+      console.log("AXIOS ERROR:", error.response?.data, error);
+      console.log(error);
+      dispatch(setError(error.response?.data?.error || "Signup failed"));
+      Alert.alert("Error", error.response?.data?.error || "Signup failed");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
   return (
     <SafeAreaProvider>
@@ -143,23 +151,36 @@ const SignUp = () => {
         barStyle="light-content"
         translucent
       />
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1B24", paddingHorizontal: 16 }}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#1F1B24", paddingHorizontal: 16 }}
+      >
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
         >
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
             {/* Header */}
-            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 20 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 20,
+              }}
+            >
               <TouchableOpacity
                 onPress={() => navigation.navigate("Login")}
                 style={{ flexDirection: "row", alignItems: "center" }}
               >
                 <Feather name="arrow-left" size={25} color="#848287" />
-                <Text style={{ color: "#fff", fontSize: 20, marginLeft: 8 }}>Register</Text>
+                <Text style={{ color: "#fff", fontSize: 20, marginLeft: 8 }}>
+                  Register
+                </Text>
               </TouchableOpacity>
-            </View> 
+            </View>
 
             {/* Form */}
             <View style={{ marginTop: 60 }}>
@@ -170,7 +191,8 @@ const SignUp = () => {
                   style={styles.countryPicker}
                 >
                   <Text style={styles.flagText}>
-                    {getFlagEmoji(selectedCountry.code)} +{selectedCountry.callingCode}
+                    {getFlagEmoji(selectedCountry.code)} +
+                    {selectedCountry.callingCode}
                   </Text>
                   <Feather name="chevron-down" size={18} color="#848287" />
                 </TouchableOpacity>
@@ -189,7 +211,12 @@ const SignUp = () => {
               <Modal visible={modalVisible} animationType="slide">
                 <SafeAreaView style={styles.modalContainer}>
                   <View style={styles.searchBox}>
-                    <Feather name="search" size={18} color="#888" style={{ marginRight: 8 }} />
+                    <Feather
+                      name="search"
+                      size={18}
+                      color="#888"
+                      style={{ marginRight: 8 }}
+                    />
                     <TextInput
                       placeholder="Search country, code or dial"
                       placeholderTextColor="#aaa"
@@ -215,14 +242,19 @@ const SignUp = () => {
                           {getFlagEmoji(item.code)} {item.label}
                         </Text>
                       </TouchableOpacity>
-                    )} 
+                    )}
                   />
                 </SafeAreaView>
               </Modal>
 
               {/* Password Input */}
               <View style={styles.passwordContainer}>
-                <Feather name="lock" size={20} color="#848287" style={styles.lockIcon} />
+                <Feather
+                  name="lock"
+                  size={20}
+                  color="#848287"
+                  style={styles.lockIcon}
+                />
                 <TextInput
                   value={password || ""}
                   onChangeText={setPassword}
@@ -231,14 +263,26 @@ const SignUp = () => {
                   placeholderTextColor="#848287"
                   style={styles.passwordInput}
                 />
-                <TouchableOpacity onPress={() => setSecureText(!secureText)} style={styles.eyeIcon}>
-                  <Feather name={secureText ? "eye-off" : "eye"} size={22} color="#848287" />
+                <TouchableOpacity
+                  onPress={() => setSecureText(!secureText)}
+                  style={styles.eyeIcon}
+                >
+                  <Feather
+                    name={secureText ? "eye-off" : "eye"}
+                    size={22}
+                    color="#848287"
+                  />
                 </TouchableOpacity>
               </View>
 
               {/* Confirm Password */}
               <View style={styles.passwordContainer}>
-                <Feather name="lock" size={20} color="#848287" style={styles.lockIcon} />
+                <Feather
+                  name="lock"
+                  size={20}
+                  color="#848287"
+                  style={styles.lockIcon}
+                />
                 <TextInput
                   value={confirmPassword || ""}
                   onChangeText={setConfirmPassword}
@@ -247,22 +291,35 @@ const SignUp = () => {
                   placeholderTextColor="#848287"
                   style={styles.passwordInput}
                 />
-                <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)} style={styles.eyeIcon}>
-                  <Feather name={secureConfirm ? "eye-off" : "eye"} size={22} color="#848287" />
+                <TouchableOpacity
+                  onPress={() => setSecureConfirm(!secureConfirm)}
+                  style={styles.eyeIcon}
+                >
+                  <Feather
+                    name={secureConfirm ? "eye-off" : "eye"}
+                    size={22}
+                    color="#848287"
+                  />
                 </TouchableOpacity>
               </View>
 
               {/* Sign Up */}
               <TouchableOpacity
                 onPress={handleSignUp}
+                disabled={loading}
                 style={{
-                  backgroundColor: "#6237A0", 
+                  backgroundColor: loading ? "#4A3A6A" : "#6237A0",
                   borderRadius: 10,
                   padding: 16,
-                  marginTop: 38 ,
+                  marginTop: 38,
+                  opacity: loading ? 0.8 : 1,
                 }}
               >
-                <Text style={styles.signup}>Sign Up</Text>
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.signup}>Sign Up</Text>
+                )}
               </TouchableOpacity>
             </View>
           </ScrollView>

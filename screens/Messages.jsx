@@ -71,6 +71,10 @@ const Messages = () => {
     </View>
   );
 
+  useEffect(() => {
+    console.log("Messages:", messages);
+  }, [messages]);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <KeyboardAvoidingView
@@ -78,86 +82,83 @@ const Messages = () => {
         behavior="padding"
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 30}
       >
-        
-          <View style={{ flex: 1,  backgroundColor: 'rgba(255,0,0,0.1)'}}>
-            {/* Header */}
-            <View style={styles.header}>
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={{ flexDirection: "row", alignItems: "center" }}
-              >
-                <Feather name="arrow-left" size={25} color="#6A1B9A" />
-                <Text style={styles.headerText}>Chats</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-                <Text style={styles.endChatText}>End chat</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Message List */}
-            <FlatList
-              ref={flatListRef}
-              data={messages}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderMessage}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingBottom: 20,
-                paddingTop: 10,
-                ...(messages.length === 0 && !selectedOption 
-                  ? { flexGrow: 1, justifyContent: "flex-end"}
-                  : {}
-                )
-              }}
-              inverted
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            />
-
-            {/* Options for initial selection */}
-            {messages.length === 0 && !selectedOption && (
-              <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
-                <Text style={styles.promptText}>
-                  To connect you with the right support team...
-                </Text>
-                {options.map((option, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.optionButton}
-                    onPress={() => handleOptionSelect(option)}
-                  >
-                    <Text style={styles.optionText}>{option}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-
-            {/* Input Bar */}
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.inputBar}>
-              <TouchableOpacity onPress={() => setShowCannedMessages(true)}>
-                <Feather
-                  name="menu"
-                  size={24}
-                  color="#6B46C1"
-                  style={{ marginRight: 10 }}
-                />
-              </TouchableOpacity>
-              <TextInput
-                style={styles.input}
-                placeholder="Message"
-                placeholderTextColor="#aaa"
-                value={inputMessage}
-                onChangeText={setInputMessage}
-                multiline
-              />
-              <TouchableOpacity onPress={() => sendMessage()}>
-                <Feather name="send" size={24} color="#6B46C1" />
-              </TouchableOpacity>
-            </View>
-            </TouchableWithoutFeedback>
+        <View style={{ flex: 1, backgroundColor: "rgba(255,0,0,0.1)" }}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ flexDirection: "row", alignItems: "center" }}
+            >
+              <Feather name="arrow-left" size={25} color="#6A1B9A" />
+              <Text style={styles.headerText}>Chats</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
+              <Text style={styles.endChatText}>End chat</Text>
+            </TouchableOpacity>
           </View>
-        
+
+          {/* Message List */}
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderMessage}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 20,
+              paddingTop: 10,
+              ...(messages.length === 0 && !selectedOption
+                ? { flexGrow: 1, justifyContent: "flex-end" }
+                : {}),
+            }}
+            inverted
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          />
+
+          {/* Options for initial selection */}
+          {messages.length === 0 && !selectedOption && (
+            <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
+              <Text style={styles.promptText}>
+                To connect you with the right support team...
+              </Text>
+              {options.map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.optionButton}
+                  onPress={() => handleOptionSelect(option)}
+                >
+                  <Text style={styles.optionText}>{option}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* Input Bar */}
+          {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+          <View style={styles.inputBar}>
+            <TouchableOpacity onPress={() => setShowCannedMessages(true)}>
+              <Feather
+                name="menu"
+                size={24}
+                color="#6B46C1"
+                style={{ marginRight: 10 }}
+              />
+            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Message"
+              placeholderTextColor="#aaa"
+              value={inputMessage}
+              onChangeText={setInputMessage}
+              multiline
+            />
+            <TouchableOpacity onPress={() => sendMessage()}>
+              <Feather name="send" size={24} color="#6B46C1" />
+            </TouchableOpacity>
+          </View>
+          {/* </TouchableWithoutFeedback> */}
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

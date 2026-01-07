@@ -7,10 +7,15 @@ import {
   TextInput,
   Image,
   ScrollView,
+  Platform
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+
+const API_URL = Platform.OS === 'web' 
+  ? 'http://localhost:5000'
+  : 'http://10.120.60.79:5000';
 
 export default function EditProfile() {
   const navigation = useNavigation();
@@ -108,7 +113,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 20,
+    paddingTop: 50,
     paddingHorizontal: 20,
   },
   leftHeader: {
